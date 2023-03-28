@@ -1,0 +1,120 @@
+*
+{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.sidenav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20vw;
+    min-width: 330px;
+    height: 100vh;
+    position: fixed;
+    z-index: 1;
+    background-color: #efefef;
+    overflow:scroll;
+}
+
+.header_text{
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    transition: 0.5s;
+    padding: 10px;
+    font-size: 20px;
+    color: rgb(52, 53, 58);
+}
+
+.thumbnail_div{
+    width: 18vw;
+    min-width: 310px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(229, 233, 235);
+    border-width: 1px;
+    border-color: rgb(200, 199, 200);
+    margin-top: 25px;
+    transition: 0.5s;
+}
+
+.thumbnail_div:hover{
+    cursor: pointer;
+    transition: 0.5s;
+    background-color: rgb(197, 223, 223);
+}
+
+
+.thumbnail_img {
+    width: 18vw;
+    min-width: 309px;
+    height: 180px;
+    object-fit: cover;
+    background-color: #1c1c28;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: 0.5s;
+}
+
+
+.thumbnail_text{
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: 0.5s;
+    padding: 10px;
+    color: rgb(67, 74, 109);
+}
+
+.appContainer {
+    margin-left: 20vw;
+    position: fixed;
+    height:100vh;
+    width: 80vw;
+    object-fit: cover;
+    background-color: #d1d1db;
+}
+
+
+
+@media screen and (max-width:420px) {
+    .sidenav {
+        width: 100vw;
+        min-width: 100vw;
+        height:40vh;
+        position: fixed;
+        z-index: 1;
+        background-color: #efefef;
+        overflow:scroll;
+    }
+    .thumbnail_div{
+        width: 90vw;
+        height: 400px;
+    }
+    .thumbnail_img{
+        width: 100vw;
+        height: 100px;
+        
+    }
+
+    .appContainer {
+        margin-left: 0vw;
+        margin-top: 40vw;
+        position: fixed;
+        height:100vh;
+        width: 100vw;
+        object-fit: cover;
+        background-color: #d1d1db;
+    }
+    
+}
