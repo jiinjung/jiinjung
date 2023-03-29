@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Rendering</title>
+</head>
+<body>
+    <canvas class="webgl"></canvas>
+    <script type="module">
+        
+    import * as THREE from 'three'
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+    import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+    import * as dat from 'lil-gui'
+
+
+    /**
+     * Base
+     */
+    // Debug
+    const gui = new dat.GUI()
+
+    // Canvas
+    const canvas = document.querySelector('canvas.webgl')
+
+    // Scene
+    const scene = new THREE.Scene()
+
+    /**
+     * Loaders
+     */
+    // Texture loader
+    const textureLoader = new THREE.TextureLoader()
+
+    const dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath('/draco/')
+
+    const gltfLoader = new GLTFLoader()
+    gltfLoader.setDRACOLoader(dracoLoader)
+
+    let mixer = null
+
+    /** 
+     * Textures
+     */
+    // const texture = textureLoader.load('/models/moonrender.jpg')
+    // texture.flipY = false
+    // texture.encoding = THREE.sRGBEncoding
+    
+    // src/playground/static/models/moonColor_.jpg
+
+    const moonColorTexture = textureLoader.load('static/models/moonColor_.jpg')
+    // const moonColorTexture = textureLoader.load('/models/moonColor_.jpg')
+    const moonNormalTexture = textureLoader.load('static/models/moonNormal.png')
+    const moonDisplacementTexture = textureLoader.load('static/models/moonDisplacement_.jpg')
+    moonColorTexture.flipY = false
+    moonDisplacementTexture.flipY = false
+    moonColorTexture.encoding = THREE.sRGBEncoding
+
+    const image = new Image()
+    image.onload = () =>
+    {
+        const texture = new THREE.Texture(image)
+        console.log(texture)
+    }
+    image.src = 'static/models/moonColor_.tif'
+
+        /**
+     * sphere
+     */
+    const sphereGeometry = new THREE.SphereGeometry(1, 100, 100);
+    const sphereMaterial = new THREE.MeshBasicMaterial({ 
+        map: moonColorTexture,
+        transparent: true
+    })
+
+
+    const moon = new THREE.Mesh( 
+        new THREE.SphereGeometry(1, 200, 100),
+        new THREE.MeshStandardMaterial({ 
+            map: moonColorTexture,
+            transparent: true,
+            normalMap: moonNormalTexture,
+            displacementMap: moonDisplacementTexture,
+            //wireframe: true,
+            displacementBias: 1,
+            displacementScale: 0.05
+        })
+    )
+    moon.geometry.setAttribute(
+        'uv2',
+        new THREE.Float16BufferAttribute(moon.geometry.attributes.uv.array, 2))
+
+    scene.add(moon)
+
+    /**
+     * Materials
+     */
+    //Baked material
+    const bakedMaterial = new THREE.MeshBasicMaterial({ map: moonColorTexture })
+
+
+
+    // const bakedMaterial = new THREE.MeshStandardMaterial({ 
+    //     map: moonColorTexture,
+    //     transparent: true,
+    //     normalMap: moonNormalTexture,
+    // })
+
+    // gltfLoader.load(
+    //     '/models/moonrender.glb',
+    //     (gltf) =>
+    //     {
+    //         gltf.scene.traverse((child)=>
+    //         {
+    //             // child.geometry.setAttribute(
+    //             //     'uv2',
+    //             //     new THREE.Float16BufferAttribute(child.geometry.attributes.uv.array, 2)
+    //             // )
+    //             //console.log(child)
+    //             child.material = bakedMaterial
+    //         })
+    //         scene.add(gltf.scene)
+    //     }
+    // )
+
+
+
+
+    /**
+     * Lights
+     */
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+    scene.add(ambientLight)
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.1)
+    directionalLight.castShadow = true
+    directionalLight.shadow.mapSize.set(1024, 1024)
+    // directionalLight.shadow.camera.far = 7
+    // directionalLight.shadow.camera.top = 1
+    // directionalLight.shadow.camera.right = 1
+    // directionalLight.shadow.camera.bottom = 7
+    directionalLight.position.set(1, 1, 1)
+    scene.add(directionalLight)
+
+    /**
+     * Sizes
+     */
+    const sizes = {
+        width: window.innerWidth,
+        height: window.innerHeight
+    }
+
+    window.addEventListener('resize', () =>
+    {
+        // Update sizes
+        sizes.width = window.innerWidth
+        sizes.height = window.innerHeight
+
+        // Update camera
+        camera.aspect = sizes.width / sizes.height
+        camera.updateProjectionMatrix()
+
+        // Update renderer
+        renderer.setSize(sizes.width, sizes.height)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    })
+
+    /**
+     * Camera
+     */
+    // Base camera
+    const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+    camera.position.set( 2, 2, 2)
+    scene.add(camera)
+
+    // Controls
+    const controls = new OrbitControls(camera, canvas)
+    controls.target.set(0, 0, 0)
+    controls.enableDamping = true
+    controls.maxDistance = 6
+    controls.minDistance = 1.2
+
+    /**
+     * Renderer
+     */
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas
+    })
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+    /**
+     * Animate
+     */
+    const clock = new THREE.Clock()
+    let previousTime = 0
+
+    const tick = () =>
+    {
+        const elapsedTime = clock.getElapsedTime()
+        const deltaTime = elapsedTime - previousTime
+        previousTime = elapsedTime
+
+        if(mixer)
+        {
+            mixer.update(deltaTime)
+        }
+
+        // Update controls
+        controls.update()
+
+        // Render
+        renderer.render(scene, camera)
+
+        // Call tick again on the next frame
+        window.requestAnimationFrame(tick)
+    }
+
+    tick()
+            </script>
+        </body>
+        </html>
+

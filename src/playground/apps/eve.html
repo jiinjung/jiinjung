@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Eve </title>
+</head>
+<body>
+    <canvas class="webgl"></canvas>
+</body>
+
+<!-- java script -->
+<script type="module">
+import './style.css'
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import * as dat from 'lil-gui'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+
+/**
+ * Base
+ */
+// Debug
+const debugObject = {}
+const gui = new dat.GUI({
+    width: 300
+})
+
+// Canvas
+const canvas = document.querySelector('canvas.webgl')
+
+// Scene
+const scene = new THREE.Scene()
+
+/**
+ * Loaders
+ */
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('/draco/')
+const gltfLoader = new GLTFLoader()
+gltfLoader.setDRACOLoader(dracoLoader)
+
+/**
+ * Models
+ */
+gltfLoader.load(
+    '/playground/static/models/Eve-.glb',
+    (gltf) =>
+    {
+        gltf.scene.scale.set(0.5, 0.5, 0.5)
+        gltf.scene.position.set(0, 0, 0)
+        //gltf.scene.rotation.y = Math.PI * 0.5
+        scene.add(gltf.scene)
+
+        gui.add(gltf.scene.rotation, 'y').min(- Math.PI).max(Math.PI).step(0.001).name('rotation')
+    }
+)
+
+// add environment map
+const environmentMapTexture = new THREE.CubeTextureLoader()
+
+    .setPath('/playground/static/textures/environmentMaps/3/')
+    .load([
+        'px.jpg',
+        'nx.jpg',
+        'py.jpg',
+        'ny.jpg',
+        'pz.jpg',
+        'nz.jpg'
+    ])
+scene.background = environmentMapTexture
+scene.environment = environmentMapTexture
+
+
+/**
+ * Lights
+ */
+// Ambient light
+const ambientLight = new THREE.AmbientLight('#ffffff', 0.5)
+scene.add(ambientLight)
+
+// Directional light
+const directionalLight = new THREE.DirectionalLight('#ffffff', 0.5)
+directionalLight.position.set(2, 2, - 1)
+scene.add(directionalLight)
+
+/**
+ * Sizes
+ */
+ const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+window.addEventListener('resize', () =>
+{
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+ /**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(40, sizes.width / sizes.height, 0.1, 100)
+camera.position.set(3, 2, -3)
+scene.add(camera)
+
+// Controls
+const controls = new OrbitControls(camera, canvas)
+controls.target.set(0, 0, 0)
+controls.enableDamping = true
+controls.minDistance = 3;
+controls.maxDistance = 20;
+controls.maxPolarAngle = Math.PI / 2;
+
+
+/**
+ * Renderer
+ */
+const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true
+})
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+// Background 
+debugObject.backgroundColor = "#dfe8ec"
+renderer.setClearColor(debugObject.backgroundColor)
+gui
+    .addColor(debugObject, 'backgroundColor')
+    .onChange(() =>
+    {
+        renderer.setClearColor(debugObject.backgroundColor)
+    })
+    .name('background color')
+
+/**
+ * Animate
+ */
+const clock = new THREE.Clock()
+let previousTime = 0
+
+const tick = () =>
+{
+    const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - previousTime
+    previousTime = elapsedTime
+
+    // directionalLight.position.z = Math.cos(elapsedTime)
+
+    // Update controls
+    controls.update()
+
+    // Render
+    renderer.render(scene, camera)
+
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick)
+}
+
+tick()
+
+
+
+
+</script>
+
+</html>
