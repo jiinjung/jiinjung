@@ -12,42 +12,42 @@
 <body>
     <div class="sidenav">
 
-        <div class="thumbnail_div" onclick="changeContent('https://01-render-moon.vercel.app')">
+        <div class="thumbnail_div" onclick="changeContent_src('https://01-render-moon.vercel.app')">
             <img src="thumbnail/moonRender.png" class="thumbnail_img">
             <div class ="thumbnail_text">
-                <h1> #moon #mare #koreanver</h1>
+                <h1> #moon #mare #koreanversion</h1>
         </div>
         </div>    
 
-        <div class="thumbnail_div" onclick="changeContent('https://vercel.com/jiinjung/lydia')" >
+        <div class="thumbnail_div" onclick="changeContent_src('https://vercel.com/jiinjung/lydia')" >
         <img src="thumbnail/zjiderveld.png" class="thumbnail_img">
         <div class ="thumbnail_text">
             <h1> #zjiderveldplot #vectorenddiagram #paleomagnetism </h1>
         </div>
         </div>
   
-        <div class="thumbnail_div" onclick="changeContent('https://stanfordpmaglab.vercel.app')">
+        <div class="thumbnail_div" onclick="changeContent_src('https://stanfordpmaglab.vercel.app')">
         <img src="thumbnail/stanfordpaleomagnetism.png" class="thumbnail_img">
         <div class ="thumbnail_text">
-            <h1> #paleomagnetismlab #stanford #magneticallyshieldedroom </h1>
+            <h1> #paleomagnetismLab #stanford #magneticallyshieldedroom </h1>
         </div>
         </div>
 
-        <div class="thumbnail_div" onclick="changeContent('https://justforfun-sigma.vercel.app/')" >
+        <div class="thumbnail_div" onclick="changeContent_src('https://justforfun-sigma.vercel.app/')" >
         <img src="thumbnail/displacementmap.png" class="thumbnail_img">
         <div class ="thumbnail_text">
             <h1> #displacementmaps #mars #moon </h1>
         </div>
         </div>
 
-        <div class="thumbnail_div" onclick="changeContent('https://justforfun-sigma.vercel.app/')" >
+        <div class="thumbnail_div" onclick="changeContent_src('https://justforfun-sigma.vercel.app/')" >
         <img src="thumbnail/pistoncell.png" class="thumbnail_img">
         <div class ="thumbnail_text">
-            <h1> #pistoncell #pressuremagnetization #samples </h1>
+            <h1> #pistoncell #GPa #pressuremagnetization #samples </h1>
         </div>
         </div>
 
-        <div class="thumbnail_div" onclick="changeContent('https://vercel.com/jiinjung/lydia')" >
+        <div class="thumbnail_div" onclick="changeContent_src('https://vercel.com/jiinjung/lydia')" >
         <img src="thumbnail/sampleprep.png" class="thumbnail_img">
         <div class ="thumbnail_text">
             <h1> #samplepreparation #laboratory #extraterrestrialmaterials </h1>
@@ -55,31 +55,31 @@
         </div>
     
 
-        <div class="thumbnail_div" onclick="directUrl('https://aresian.net')">
+        <div class="thumbnail_div" onclick="changeContent_html('apps/eve.html')">
         <img src="thumbnail/aresian.png" class="thumbnail_img">
         <div class ="thumbnail_text">
             <h1> #mars #capybara #galecrator #topography #metaverse </h1>
         </div>
         </div>
 
-        <div class="thumbnail_div" onclick="directUrl('https://aresian.net')">
+        <div class="thumbnail_div" onclick="changeContent_html('apps/rabbitGo.html')">
         <img src="thumbnail/rabbitgo.png" class="thumbnail_img">
         <div class ="thumbnail_text">
             <h1> #rabbit #sciencegame #speedgame </h1>
         </div>
         </div>
 
-        <div class="thumbnail_div" onclick="directUrl('https://aresian.net')">
+        <div class="thumbnail_div" onclick="changeContent_html('apps/impactCrater.html')">
         <img src="thumbnail/lydia.png" class="thumbnail_img">
         <div class ="thumbnail_text">
-            <h1> #rabbit #sciencegame #speedgame </h1>
+            <h1> #bust #lydia #3d #art</h1>
         </div>
         </div>
 
-        <div class="thumbnail_div" onclick="directUrl('https://aresian.net')">
+        <div class="thumbnail_div" onclick="changeContent_html('apps/eve.html')">
         <img src="thumbnail/eve.png" class="thumbnail_img">
         <div class ="thumbnail_text">
-            <h1> #rabbit #sciencegame #speedgame </h1>
+            <h1> #bust #eve #3d #art</h1>
         </div>
         </div>
 
@@ -95,47 +95,23 @@
 </body>
 
 <script type="text/javascript">
-    function changeContent(url){
+
+    function getCurrentURL () {
+        return window.location.href
+    }
+
+    const url = getCurrentURL()
+
+    function changeContent_html(path){
+        var iframe = document.querySelector('iframe');
+        iframe.src =  url.replace('playground.html', path);
+    }
+
+    function changeContent_src(url){
         // find the iframe and change the src
         var iframe = document.querySelector('iframe');
         iframe.src = url;
     }
 
-    function directUrl(url){
-        var iframe = document.querySelector('iframe');
-        iframe.contentWindow.document.body.innerHTML = '';
-        var img = document.createElement('img');
-        img.className = 'iframe_img';
-        img.src = "thumbnail/aresian.png";
-        img.style.position = 'absolute';
-        img.style.opacity = '0.5';
-        img.style.pointerEvents = 'none';
-        img.style.top = '0';
-        img.style.left = '0';
-        img.style.width = '100vw';
-        img.style.height = '100vh';
-        img.style.zIndex = '0';
-        img.style.objectFit = 'cover';
-
-
-        // add url link
-        var div = document.createElement('div');
-        div.style.position = 'absolute';
-        div.style.top = '0';
-        div.style.left = '0';
-        div.style.width = '100%';
-        div.style.height = '100%';
-        div.style.pointerEvents = 'none';
-        div.style.zIndex = '100';
-        
-        // add url link text to div
-        var a = document.createElement('a');
-        a.textContent = url;
-
-        // append img
-        iframe.contentWindow.document.body.appendChild(a);
-        iframe.contentWindow.document.body.appendChild(img);
-
-    }
 </script>
 </html>

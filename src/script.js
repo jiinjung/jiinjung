@@ -3,46 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
-import jiinjung from '../static/images/jiin.jpg'
-import lunardynamo from '../static/images/lunardynamo.jpg'
-import feni from '../static/videos/FeNi.mp4'
-import impactcratering from '../static/videos/impactcratering.mp4'
-import kseeglogo from '../static/images/kseeg-logo.jpg'
-import zjiderveld from '../static/videos/zjiderveld.mp4'
-import stanfordpmaglab from '../static/images/stanfordpmaglab.jpg'
-import rabbitgo from '../static/images/rabbitgo.png'
-import aresian from '../static/videos/aresian_short.mp4'
 import enfj from '../static/images/enfj_white.png'
-import m3 from '../static/images/m3.jpg'
-
-
-document.getElementById('jiin-img').src = jiinjung
-document.getElementById('research1-img').src = lunardynamo
-document.getElementById('research4-img').src = m3
-document.getElementById('research2-video').src = feni
-document.getElementById('kseeg').src = kseeglogo
-document.getElementById('research2-video').muted = true
-document.getElementById('research2-video').autoplay = true
-document.getElementById('research2-video').loop = true
-
-document.getElementById('research3-video').src = impactcratering
-document.getElementById('research3-video').muted = true
-document.getElementById('research3-video').autoplay = true
-document.getElementById('research3-video').loop = true
-
-document.getElementById('portfolio1-video').src = zjiderveld
-document.getElementById('portfolio1-video').muted = true
-document.getElementById('portfolio1-video').autoplay = true
-document.getElementById('portfolio1-video').loop = true
-
-document.getElementById('portfolio2-img').src = stanfordpmaglab
-document.getElementById('portfolio3-video').src = aresian
-document.getElementById('portfolio3-video').muted = true
-document.getElementById('portfolio3-video').autoplay = true
-document.getElementById('portfolio3-video').loop = true
-
-document.getElementById('portfolio4-img').src = rabbitgo
-
 
 /**
  * Sizes

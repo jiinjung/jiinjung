@@ -194,7 +194,6 @@ html
     box-shadow: 0 10px 10px rgba(68, 50, 113, 0.2);
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    transition-delay:0s;
 }
 
 .research_p{
