@@ -20,6 +20,7 @@ function myGreeting() {
     document.body.style.visibility = 'visible';
     // add class name to loading page
     loadingPage.style.opacity = '0';
+    loadingPage.style.visibility = 'hidden';
 }
 
 setTimeout(myGreeting, 6500);
