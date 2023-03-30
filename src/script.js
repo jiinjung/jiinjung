@@ -2,8 +2,27 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-
 import enfj from '../static/images/enfj_white.png'
+import Typed from 'typed.js'
+
+/** 
+ * loading page 
+ */
+const loadingPage = document.querySelector('.loading_page');
+
+var typed = new Typed('.typed', {
+    strings: ["안녕하세요!"," Hi, I'm <span class='name'> <b>Ji-In", "I'm a <span class='job'> Ph.D. candidate in Geophysics studying <b>Lunar Dynamo</span>"],
+    typeSpeed: 20,
+    backSpeed: 20,
+});
+
+function myGreeting() {
+    document.body.style.visibility = 'visible';
+    // add class name to loading page
+    loadingPage.style.opacity = '0';
+}
+
+setTimeout(myGreeting, 6500);
 
 /**
  * Sizes
@@ -63,7 +82,6 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 scene.background = new THREE.Color('#FFFFFF')
-
 
 
 /**
@@ -232,9 +250,9 @@ const tick = () =>
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
 
+
     // Animate camera
     camera.position.y = - scrollY / sizes.height * objectsDistance
-
     
     if (capybaraGLTF){
 
@@ -306,7 +324,7 @@ const tick = () =>
     }
 
     }
-    
+
 
     // Render
     renderer.render(scene, camera)
