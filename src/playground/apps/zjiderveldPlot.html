@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3d zijderveldplot</title>
+    <style>
+    *
+    {
+        margin: 0;
+        padding: 0;
+    }
+
+    html,
+    body
+    {
+        overflow: hidden;
+    }
+
+    .webgl.pointer
+    {
+        cursor: pointer;
+    }
+
+
+    .webgl
+    {
+        position: fixed;
+        top: 0;
+        left: 0;
+        outline: none;
+        cursor: default;
+    }
+
+    .point
+    {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+    }
+
+    .point .label
+    {
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #00000077;
+        border: 1px solid #ffffff77;
+        color: #ffffff;
+        font-family: Helvetica, Arial, sans-serif;
+        text-align: center;
+        line-height: 40px;
+        font-weight: 100;
+        font-size: 12px;
+        cursor: pointer;
+        transform: scale(0.001, 0.001);
+        transition: transform 0.1s;
+    }
+
+    .point.visible .label{
+        transform: scale(0.7, 0.7);
+    }
+
+    .demag-step
+    {
+        position: absolute;
+        top: 30px;
+        left: 500px;
+        width: 200px;
+        padding: 20px;
+        border-radius: 4px;
+        background: #00000077;
+        border: 1px solid #00000077;
+        color: #ffffff;
+        text-align: center;
+        line-height: 1.3em;
+        font-family: Helvetica, Arial, sans-serif;
+        font-weight: 100;
+        font-size: 14px;
+        opacity: 1;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .point:hover .label
+    {
+        opacity: 1;
+        transition: opacity 0.3s;
+    }
+
+    .point:hover .text
+    {
+        opacity: 1;
+        transition: opacity 0.3s;
+    }
+    .point:hover .id
+    {
+        opacity: 1;
+        transition: opacity 0.3s;
+    }
+
+    .point .text
+    {
+        position: absolute;
+        top: 30px;
+        left: -120px;
+        width: 120px;
+        padding: 20px;
+        border-radius: 2px;
+        background: #00000077;
+        border: 1px solid #00000077;
+        color: #ffffff;
+        text-align: center;
+        line-height: 1.3em;
+        font-family: Helvetica, Arial, sans-serif;
+        font-weight: 100;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .point.visible .text{
+        opacity: 1;
+        transition: opacity 0.3s;
+    }
+
+    .point .id
+    {
+        position: absolute;
+        top: 90px;
+        left: -120px;
+        width: 200px;
+        padding: 20px;
+        border-radius: 4px;
+        background: #00000077;
+        border: 1px solid #00000077;
+        color: #ffffff;
+        text-align: center;
+        line-height: 1.2em;
+        font-family: Helvetica, Arial, sans-serif;
+        font-weight: 100;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .menubar{
+        position: relative;
+        width: 100vw;
+        height: 80px;
+        background: #00000077;
+        touch-action: none;
+        opacity: 1;
+        
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 1;
+    }
+
+    .menubarContainer{
+        position: absolute;
+        top: 100vh;
+        left: 0;
+        width: 100vw;
+        height: 0;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 15px;
+        line-height: 1.5em;
+        
+        color: white;
+        display: flex;
+        flex-direction: column-reverse;
+    }
+    </style>
+
+</head>
+
+<body>
+    
+    <canvas class="webgl"></canvas>
+
+    <!-- make a div class options that comes to the front-->
+    <div class ="options" style="z-index: 999; text-align: center; ">     </div>
+
+    <div class="menubarContainer">
+        <div class="menubar ">
+
+            <div id = "menubar">
+
+                <button onclick="window.location='/'" style="
+                    font-size: 38px;">
+                </button>
+            </div>
+
+            <div id = "menubar2">
+
+                <button onclick="window.location='/'" style="
+                    font-size: 38px;">
+                </button>
+            </div>
+
+        </div>
+
+
+<script type="module">
+
+// import './zjiderveldPlot.css'
+import * as THREE from 'three'
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { Euler, Vector3 } from 'three';
+import * as math from 'mathjs'
+import { composition } from 'mathjs';
+import * as dat from 'lil-gui'
+import * as numeric from 'numeric'; // somehow not working in vite but in webgl, so I use ml-matrix instead for eigenvalue calculation
+import { Matrix, EigenvalueDecomposition } from 'ml-matrix';
+
+
+const ref = 50
+const scale = 1e7
+const rot = Math.PI / 2
+const rad = 180 / Math.PI
+const oriVec = new THREE.Vector3( 0, 0, 0 )
+const pcaAxis = new THREE.Vector3( 0, 1, 0 )
+
+// input your sample data here
+const sampledata = [{level : 0, x : -1.44e-06, y : 6.45e-07, z : -1.78e-06},{level : 1, x : -1.54e-06, y : 7.28e-07, z : -1.9e-06},{level : 2, x : -1.56e-06, y : 1.37e-06, z : -1.89e-06},{level : 3, x : -1.43e-06, y : 1.99e-06, z : -1.84e-06},{level : 4, x : -1.17e-06, y : 2.47e-06, z : -1.72e-06},{level : 5, x : -9.46e-07, y : 2.79e-06, z : -1.59e-06},{level : 6, x : -9.92e-07, y : 2.95e-06, z : -1.6e-06},{level : 7, x : -8.33e-07, y : 3.06e-06, z : -1.52e-06},{level : 8, x : -8.75e-07, y : 3.11e-06, z : -1.46e-06},{level : 9, x : -7.66e-07, y : 3.11e-06, z : -1.43e-06},{level : 10, x : -6.04e-07, y : 3e-06, z : -1.42e-06},{level : 11, x : -5.55e-07, y : 2.94e-06, z : -1.42e-06},{level : 12, x : -5.49e-07, y : 2.85e-06, z : -1.48e-06},{level : 13, x : -5.76e-07, y : 2.82e-06, z : -1.28e-06},{level : 14, x : -5.36e-07, y : 2.75e-06, z : -1.3e-06},{level : 15, x : -5.04e-07, y : 2.73e-06, z : -1.24e-06},{level : 16, x : -4.03e-07, y : 2.69e-06, z : -1.29e-06},{level : 17, x : -4.54e-07, y : 2.6e-06, z : -1.18e-06},{level : 18, x : -4.02e-07, y : 2.42e-06, z : -1.29e-06},{level : 19, x : -4.21e-07, y : 2.43e-06, z : -1.15e-06},{level : 20, x : -3.16e-07, y : 2.35e-06, z : -1.14e-06},{level : 22, x : -3.02e-07, y : 2.21e-06, z : -1.07e-06},{level : 24, x : -3.61e-07, y : 2.09e-06, z : -1.03e-06},{level : 26, x : -3.66e-07, y : 1.94e-06, z : -9.62e-07},{level : 28, x : -2.89e-07, y : 1.87e-06, z : -9.53e-07},{level : 30, x : -3.01e-07, y : 1.71e-06, z : -1.08e-06},{level : 32, x : -2.39e-07, y : 1.57e-06, z : -9.61e-07},{level : 34, x : -3.14e-07, y : 1.66e-06, z : -8.74e-07},{level : 36, x : -3.31e-07, y : 1.45e-06, z : -7.36e-07},{level : 38, x : -2.34e-07, y : 1.34e-06, z : -7.71e-07},{level : 40, x : -3.31e-07, y : 1.37e-06, z : -5.85e-07},{level : 42, x : -2.95e-07, y : 1.33e-06, z : -5.34e-07},{level : 44, x : -2.26e-07, y : 1.29e-06, z : -6.07e-07},{level : 46, x : -1.23e-07, y : 1.18e-06, z : -6.15e-07},{level : 48, x : -1.73e-07, y : 1.06e-06, z : -5.95e-07},{level : 50, x : -1.58e-07, y : 1.07e-06, z : -3.88e-07},{level : 52, x : -2.31e-07, y : 9.75e-07, z : -3.89e-07},{level : 54, x : -2e-07, y : 9.38e-07, z : -3.72e-07},{level : 56, x : -1.44e-07, y : 9.1e-07, z : -4.29e-07},{level : 58, x : -2.04e-07, y : 8.36e-07, z : -3.5e-07},{level : 60, x : -1.61e-07, y : 8.67e-07, z : -3.09e-07},{level : 65, x : -2.17e-07, y : 8.11e-07, z : -2.84e-07},{level : 70, x : -1.13e-07, y : 7.32e-07, z : -2.6e-07},{level : 75, x : -1.6e-07, y : 6.35e-07, z : -2.17e-07},{level : 80, x : -1.19e-07, y : 5.24e-07, z : -3.03e-07},{level : 85, x : -1.04e-07, y : 5.32e-07, z : -6.67e-08},{level : 90, x : -1.1e-07, y : 4.89e-07, z : -4.31e-08},{level : 95, x : -1.48e-07, y : 4.09e-07, z : -2.35e-07},{level : 100, x : -7.48e-08, y : 3.32e-07, z : -7.43e-08},];
+
+/**
+ * Global Variables
+ */
+let selectedPoints = []
+let currentIntersect = null
+
+/**
+ * Color Set
+ */
+
+const lineColor = '#C5C6D0'
+const shadowColor = '#374649'//'#B8B8B8'//'#9897A9'//'#C5C6D0'
+const mainColor = '#374649'//'#808080'
+const selectedColor = '#01B8AA' //green
+const purpleColor = '#A66999' //purple
+const redColor = '#FD625E' //red
+const toggleColor = '#3599B8' //blue
+const opac = 0.3
+
+let point = {
+    radius: 0.5,
+    widthSegments: 8,
+    heightSegments: 8
+}
+
+/**
+ * Debug
+ */
+const gui = new dat.GUI({
+    width: 400
+})
+
+const debug_Selection = gui.addFolder('bound selections')
+const debug_CalType = gui.addFolder('calculation type')
+const debug_GUI = gui.addFolder('graphic components')
+const debugObject = {}
+
+debugObject.lowerbound = 0
+debugObject.upperbound = 0
+debugObject.fit1 = false
+debugObject.fit2 = false
+
+debugObject.unanchored = true
+debugObject.anchored = false
+debugObject.includeOrigin = false
+debugObject.GCfit = false
+debugObject.Fisher = false
+
+debugObject.centerOfMass = true
+debugObject.bestFitLine = true
+debugObject.poleLine = false
+debugObject.DANG = false
+debugObject.covEllipsoid = false
+debugObject.planeFit = false
+debugObject.GCfitSphere = false
+debugObject.FisherMeanLine = false
+debugObject.Fishera95Cone = false
+debugObject.FisherSphere = false
+
+
+debug_Selection.add(debugObject, 'lowerbound', [ 0, 1, 2, 3, 4]).name('lower bound').disable(true)
+debug_Selection.add(debugObject, 'upperbound', [ 0, 1, 2, 3, 4]).name('upper bound').disable(true)
+debug_Selection.add(debugObject, 'fit1').name('fit1').onChange(()=>{
+    if(debugObject.fit1){
+        debugObject.fit2 = false
+        selectedPoints = fit1
+    }else{
+        debugObject.fit1 = false
+        selectedPoints = []
+    }
+
+    updateDEBUG_GUI(debug_Selection)
+    render()
+})
+debug_Selection.add(debugObject, 'fit2').name('fit2').onChange(()=>{
+    if(debugObject.fit2){
+        debugObject.fit1 = false
+        selectedPoints = fit2
+    }else{
+        debugObject.fit2 = false
+        selectedPoints = []
+    }
+
+    updateDEBUG_GUI(debug_Selection)
+    render()
+})
+debug_GUI.add(debugObject, 'centerOfMass').name('center of mass').onChange(()=>{ render() })
+debug_GUI.add(debugObject, 'bestFitLine').name('best fit line').onChange(()=>{ render() })
+debug_GUI.add(debugObject, 'DANG').name('origin line').onChange(()=>{ render() })
+debug_GUI.add(debugObject, 'covEllipsoid').name('cov matrix ellipsoid').onChange(()=>{ render() })
+
+debug_GUI.add(debugObject, 'poleLine').name('pole line').onChange(()=>{ render() })
+debug_GUI.add(debugObject, 'planeFit').name('best fit plane').onChange(()=>{ render() })
+debug_GUI.add(debugObject, 'GCfitSphere').name('great circle fit sphere').onChange(()=>{ render() })
+
+debug_GUI.add(debugObject, 'FisherMeanLine').name('fisher mean line').onChange(()=>{ render() })
+debug_GUI.add(debugObject, 'Fishera95Cone').name('fisher a95 cone').onChange(()=>{ render() })
+debug_GUI.add(debugObject, 'FisherSphere').name('fisher sphere').onChange(()=>{ render() })
+
+
+function updateDEBUG_GUI(debugFolder){
+    let debugControllers = debugFolder.controllers
+
+    for (let debugControls of debugControllers)
+    {
+        debugControls.updateDisplay()
+    }
+}
+
+function falseDEBUG_GUI(){
+
+
+    debugObject.unanchored = false
+    debugObject.anchored = false
+    debugObject.includeOrigin = false
+    debugObject.GCfit = false
+    debugObject.Fisher = false
+
+    debugObject.centerOfMass = false
+    debugObject.bestFitLine = false
+    debugObject.poleLine = false
+    debugObject.planeFit = false
+    debugObject.DANG = false
+    debugObject.covEllipsoid = false
+    debugObject.GCfitSphere = false
+    debugObject.FisherSphere = false
+    debugObject.FisherMeanLine = false
+    debugObject.Fishera95Cone = false
+
+}
+
+function resetDEBUG_GUI(){
+    debugObject.unanchored = true
+    debugObject.anchored = false
+    debugObject.includeOrigin = false
+    debugObject.GCfit = false
+    debugObject.Fisher = false
+
+    debugObject.centerOfMass = true
+    debugObject.bestFitLine = true
+    debugObject.poleLine = false
+    debugObject.planeFit = false
+    debugObject.DANG = false
+    debugObject.covEllipsoid = false
+    debugObject.GCfitSphere = false
+    debugObject.FisherMeanLine = false
+    debugObject.FisherSphere = false
+    debugObject.Fishera95Cone = false
+}
+
+debug_CalType.add(debugObject, 'unanchored').name('line unanchored fit').onChange(()=>{ 
+    if(debugObject.unanchored){
+        falseDEBUG_GUI()
+        debugObject.unanchored = true
+        debugObject.centerOfMass = true
+        debugObject.bestFitLine = true
+        debugObject.DANG = true
+        debugObject.covEllipsoid = true
+    }else{
+        falseDEBUG_GUI()
+    }
+    updateDEBUG_GUI(debug_GUI)
+    updateDEBUG_GUI(debug_CalType)
+    render() })
+
+debug_CalType.add(debugObject, 'anchored').name('line anchored fit').onChange(()=>{ 
+    if(debugObject.anchored){
+        falseDEBUG_GUI()
+        debugObject.anchored = true
+        debugObject.centerOfMass = true
+        debugObject.bestFitLine = true
+        debugObject.covEllipsoid = true
+    }else{
+        falseDEBUG_GUI()
+    }
+    updateDEBUG_GUI(debug_GUI)
+    updateDEBUG_GUI(debug_CalType)
+    render() })
+
+debug_CalType.add(debugObject, 'includeOrigin').name('line include origin fit').onChange(()=>{ 
+    if(debugObject.includeOrigin){
+        falseDEBUG_GUI()
+        debugObject.includeOrigin = true
+        debugObject.centerOfMass = true
+        debugObject.bestFitLine = true
+        debugObject.DANG = true
+        debugObject.covEllipsoid = true
+    }else{
+        falseDEBUG_GUI()
+    }
+    updateDEBUG_GUI(debug_GUI)
+    updateDEBUG_GUI(debug_CalType)
+    render() })
+
+debug_CalType.add(debugObject, 'GCfit').name('great circle fit').onChange(()=>{ 
+    if(debugObject.GCfit){
+        falseDEBUG_GUI()
+        debugObject.GCfit = true
+        debugObject.centerOfMass = true
+        debugObject.planeFit = true
+        debugObject.GCfitSphere = true
+        debugObject.poleLine = true
+    }else{
+        falseDEBUG_GUI()
+    }
+    updateDEBUG_GUI(debug_GUI)
+    updateDEBUG_GUI(debug_CalType)
+    render()
+ })
+
+debug_CalType.add(debugObject, 'Fisher').name('fisher statistics').onChange(()=>{
+    if(debugObject.Fisher){
+        falseDEBUG_GUI()
+        debugObject.Fisher = true
+        debugObject.FisherSphere = true
+        debugObject.Fishera95Cone = true
+        debugObject.FisherMeanLine = true
+    }else{
+        falseDEBUG_GUI()
+    }
+    updateDEBUG_GUI(debug_GUI)
+    updateDEBUG_GUI(debug_CalType)
+    render()
+})
+
+
+
+/**
+ * Base
+ */
+// Canvas
+const canvas = document.querySelector('canvas.webgl')
+
+// Scene
+const scene = new THREE.Scene()
+scene.background = new THREE.Color( 0xf0f0f0 )
+
+/**
+ * Lights
+ */
+ const ambientLight = new THREE.AmbientLight(0xf0f0f0)
+ scene.add(ambientLight)
+
+/**
+ * Menubar
+ */
+const menubar = document.getElementById('menubar')
+const menubar2 = document.getElementById('menubar2')
+//console.log(menubar)
+
+/**
+ * Sounds
+ */
+const calculationSound = new Audio('../static/sounds/calculate.wav')
+const playCalculationSound = () => { 
+    calculationSound.currentTime = 0
+    calculationSound.play()
+}
+
+const selectionSound = new Audio('../static/sounds/select.wav')
+const playSelectionSound = () => { 
+    selectionSound.currentTime = 0
+    selectionSound.play()}
+
+const unSelectionSound = new Audio('../static/sounds/unselect.wav')
+const playUnSelectionSound = () => { 
+    unSelectionSound.currentTime = 0
+    unSelectionSound.play()}
+
+    
+/**
+ * Materials
+ */
+
+const PCALineMaterial = new THREE.LineBasicMaterial({
+	color: 0x000000,
+    linewidth: 10
+})
+
+const lineMaterial = new THREE.LineBasicMaterial({
+	color: 0x000000
+})
+
+const shadowPointMaterial = new THREE.MeshBasicMaterial({
+	color: shadowColor,
+    opacity: 0.1,
+    transparent: true
+})
+
+/**
+ * add functions
+ */
+let sphereVectorGeometry = new THREE.SphereGeometry( point.radius, point.widthSegments, point.heightSegments )
+
+
+function addSphere(vectorSet, px, py, pz, pc, n, opacity, wireframe)
+{
+    let sphereVectorMaterial = new THREE.MeshBasicMaterial( { color: pc } )
+    sphereVectorMaterial.opacity = opacity
+    sphereVectorMaterial.transparent = true
+    //sphereVectorMaterial.wireframe = wireframe
+
+    let vectorID = new THREE.Mesh( sphereVectorGeometry, sphereVectorMaterial )
+    vectorID.position.x = px
+    vectorID.position.y = py 
+    vectorID.position.z = pz 
+    vectorID.name = n
+    scene.add( vectorID )
+    vectorSet.push( vectorID )
+
+    return vectorID
+}
+
+function addHTMLPoint (n, data) {
+
+    let level = data.level
+
+    const pointDiv = document.createElement("div");
+    pointDiv.className = "point point-" + String(n);
+
+    const labelDiv = document.createElement("div");
+    labelDiv.className = "label"
+    labelDiv.textContent = String(level);
+    //pointDiv.appendChild(labelDiv);
+
+    const textDiv = document.createElement("div");
+    textDiv.className = "text"
+    textDiv.innerHTML = 
+    'AF Level:        '+ String(level) + '  (mT) <br/>'
+     + '<br/>'
+     + 'x:        ' + String(data.x.toExponential(2)) + '  (emu) <br/>'
+     + 'y:        ' + String(data.y.toExponential(2)) + '  (emu) <br/>'
+     + 'z:        ' + String(data.z.toExponential(2)) + '  (emu)';
+    pointDiv.appendChild(textDiv);
+
+    const currentDiv = document.getElementById("loading-bar");
+    document.body.insertBefore(pointDiv, currentDiv);
+}
+
+function addGrid(x, y, z, r1, r2, r3, name){
+    const helper = new THREE.GridHelper( 100, 100 );
+    helper.position.x = x
+    helper.position.y = y;
+    helper.position.z = z;
+
+    helper.rotation.x = r1;
+    helper.rotation.y = r2;
+    helper.rotation.z = r3;
+
+    helper.material.opacity = 0.1;
+    helper.material.transparent = true;
+    helper.name = name
+    scene.add( helper );
+
+    return helper
+}
+
+function addLine(x1, y1, z1, x2, y2, z2, name)
+{
+    let linePoints = []
+    linePoints.push( new THREE.Vector3( x1, y1, z1) );
+    linePoints.push( new THREE.Vector3( x2, y2, z2 ) );
+    let lineGeometry = new THREE.BufferGeometry().setFromPoints( linePoints )
+    let lineMaterial = new THREE.LineBasicMaterial( { color: lineColor } )
+    let line = new THREE.Line( lineGeometry, lineMaterial )
+    line.name = name
+    scene.add(line)
+
+    return line
+}
+ 
+let linex = addLine( ref,    0,    0, -ref,    0,    0, 'origin')
+let linez = addLine(   0,  ref,    0,    0, -ref,    0, 'origin')
+let liney = addLine(   0,    0,  ref,    0,    0, -ref, 'origin')
+
+let set1 = addGrid(   0, -ref,    0,   0, rot,   0, 'set1')
+let set2 = addGrid(   0,  ref,    0,   0, rot,   0, 'set2')
+let set3 = addGrid(   0,    0, -ref, rot,   0,   0, 'set3')
+let set4 = addGrid(   0,    0,  ref, rot,   0,   0, 'set4')
+let set5 = addGrid( ref,    0,    0,   0,   0, rot, 'set5')
+let set6 = addGrid(-ref,    0,    0,   0,   0, rot, 'set6')
+
+let gridHelperSets = [ set1, set2, set3, set4, set5, set6 ]
+
+let gridSets = {
+'set1':[set1, addLine(-ref, -ref,   0,  ref, -ref,   0, 'set1'), addLine(   0, -ref, -ref,   0, -ref,  ref, 'set1')],
+'set2':[set2, addLine(-ref,  ref,   0,  ref,  ref,   0, 'set2'), addLine(   0,  ref,  ref,   0,  ref, -ref, 'set2')],
+'set3':[set3, addLine(-ref,   0, -ref,  ref,   0, -ref, 'set3'), addLine(   0, -ref, -ref,   0,  ref, -ref, 'set3')],
+'set4':[set4, addLine( ref,   0,  ref, -ref,   0,  ref, 'set4'), addLine(   0,  ref,  ref,   0, -ref,  ref, 'set4')],
+'set5':[set5, addLine( ref,   0,  ref,  ref,   0, -ref, 'set5'), addLine( ref,  ref,    0, ref, -ref,    0, 'set5')],
+'set6':[set6, addLine(-ref,   0, -ref, -ref,   0,  ref, 'set6'), addLine(-ref, -ref,    0,-ref,  ref,    0, 'set6')],
+}
+
+
+let v0 = [], v1 = [], v2 = [], v3 =[], v4 = [], v5 = [], v6 =[]
+let pv0 = [], pv1 = [], pv2 = [], pv3 = [], pv4 = [], pv5 =[], pv6 = []
+let allPointMeshes
+
+function drawPoints(){
+    for (let i = 0; i < sampledata.length; i++) {
+        //scene.remove(pv0[i], pv1[i], pv2[i], pv3[i], pv4[i], pv5[i], pv6[i])
+
+        pv0.push(addSphere(v0, sampledata[i].x * scale, sampledata[i].y * scale, sampledata[i].z * scale, 808000, i, 1, true))
+        pv1.push(addSphere(v1, sampledata[i].x * scale,                    -ref, sampledata[i].z * scale, 0x000000, i, opac, false))
+        pv2.push(addSphere(v2, sampledata[i].x * scale,                     ref, sampledata[i].z * scale, 0x000000, i, opac, false))
+        pv3.push(addSphere(v3, sampledata[i].x * scale, sampledata[i].y * scale,                    -ref, 0x000000, i, opac, false))
+        pv4.push(addSphere(v4, sampledata[i].x * scale, sampledata[i].y * scale,                     ref, 0x000000, i, opac, false))
+        pv5.push(addSphere(v5,                     ref, sampledata[i].y * scale, sampledata[i].z * scale, 0x000000, i, opac, false))
+        pv6.push(addSphere(v6,                    -ref, sampledata[i].y * scale, sampledata[i].z * scale, 0x000000, i, opac, false))
+
+        gridSets['set1'].push(pv1)
+        gridSets['set2'].push(pv2)
+        gridSets['set3'].push(pv3)
+        gridSets['set4'].push(pv4)
+        gridSets['set5'].push(pv5)
+        gridSets['set6'].push(pv6)
+    
+        allPointMeshes = pv0
+        addHTMLPoint(i, sampledata[i])
+
+    }
+    pv0 = []; pv1 = []; pv2 = []; pv3 = []; pv4 = []; pv5 =[]; pv6 = [];
+}
+
+let  originPoint, originPoint1, originPoint2, originPoint3, originPoint4, originPoint5, originPoint6
+function drawOriginPoints(){
+
+    let originShadowPointMaterial = new THREE.MeshBasicMaterial( { color: selectedColor } )
+    originShadowPointMaterial.opacity = opac
+    originShadowPointMaterial.transparent = true
+
+    originPoint = new THREE.Mesh( sphereVectorGeometry, new THREE.MeshBasicMaterial( { color: selectedColor } ) )
+    originPoint1 = new THREE.Mesh( sphereVectorGeometry, originShadowPointMaterial ); originPoint1.position.x = ref 
+    originPoint2 = new THREE.Mesh( sphereVectorGeometry, originShadowPointMaterial ); originPoint2.position.x = -ref
+    originPoint3 = new THREE.Mesh( sphereVectorGeometry, originShadowPointMaterial ); originPoint3.position.y = ref 
+    originPoint4 = new THREE.Mesh( sphereVectorGeometry, originShadowPointMaterial ); originPoint4.position.y = -ref
+    originPoint5 = new THREE.Mesh( sphereVectorGeometry, originShadowPointMaterial ); originPoint5.position.z = ref 
+    originPoint6 = new THREE.Mesh( sphereVectorGeometry, originShadowPointMaterial ); originPoint6.position.z = -ref
+}
+
+drawPoints()
+drawOriginPoints()
+
+const points = []
+for (let i = 0; i < sampledata.length; i++) {
+    let newPosition = new THREE.Vector3(sampledata[i].x * scale, sampledata[i].y * scale, sampledata[i].z * scale)
+    points.push(
+        {  
+            position: newPosition,
+            element: document.querySelector('.point-' + String(i)),
+            AFlevel: sampledata[i].level,
+            number: i
+        }
+    )
+}
+
+
+let fit1 = []
+let fit2 = []
+for (let pointMesh of allPointMeshes){
+
+    if (pointMesh.name < 10){
+        fit1.push(pointMesh)
+    }else{
+        fit2.push(pointMesh)
+    }
+    
+}
+
+
+/**
+ * PCA calculation tools
+ */
+function centerOfMass(selectedPoints){
+    
+    if(debugObject.anchored || debugObject.GCfit){
+
+        return [0, 0, 0]
+
+    }else{
+
+        let x_com = []
+        let y_com = []
+        let z_com = []
+    
+        if(debugObject.includeOrigin){
+            x_com.push(0)
+            y_com.push(0)
+            z_com.push(0)
+        }
+        
+        for (let selectedPoint of selectedPoints){
+            x_com.push(sampledata[selectedPoint.name].x)
+            y_com.push(sampledata[selectedPoint.name].y)
+            z_com.push(sampledata[selectedPoint.name].z)
+        }
+        
+        let x_hat = math.mean(x_com)
+        let y_hat = math.mean(y_com)
+        let z_hat = math.mean(z_com)
+    
+        return [x_hat, y_hat, z_hat]
+    }
+}
+
+function demagStepSort( a, b ) {
+if ( a.name < b.name ){
+    return -1
+}
+if ( a.name > b.name ){
+    return 1;
+}
+    return 0;
+}
+
+
+function getDiffVectors(selectedPoints){
+    selectedPoints.sort(demagStepSort)
+
+    let x_com = []
+    let y_com = []
+    let z_com = []
+
+    let diffX, diffY, diffZ, diffNorm
+        for (let i = 0; i < selectedPoints.length; i++){
+            if (i == selectedPoints.length - 1){
+                diffX = sampledata[selectedPoints[i].name].x
+                diffY = sampledata[selectedPoints[i].name].y
+                diffZ = sampledata[selectedPoints[i].name].z
+            }else{
+                diffX = sampledata[selectedPoints[i].name].x - sampledata[selectedPoints[i + 1].name].x
+                diffY = sampledata[selectedPoints[i].name].y - sampledata[selectedPoints[i + 1].name].y
+                diffZ = sampledata[selectedPoints[i].name].z - sampledata[selectedPoints[i + 1].name].z
+            }
+            diffNorm = math.norm([diffX, diffY, diffZ])
+            
+            x_com.push(diffX / diffNorm)
+            y_com.push(diffY / diffNorm)
+            z_com.push(diffZ / diffNorm)
+        }
+    
+    return [x_com, y_com, z_com]
+}
+
+
+function covM(selectedPoints){
+
+    let x_com = []
+    let y_com = []
+    let z_com = []
+
+    
+
+    selectedPoints.sort(demagStepSort)
+
+    if (debugObject.GCfit){
+        x_com.length = 0
+        y_com.length = 0
+        z_com.length = 0
+
+        let diffX, diffY, diffZ, diffNorm
+        for (let i = 0; i < selectedPoints.length; i++){
+            if (i == selectedPoints.length - 1){
+                diffX = sampledata[selectedPoints[i].name].x
+                diffY = sampledata[selectedPoints[i].name].y
+                diffZ = sampledata[selectedPoints[i].name].z
+            }else{
+                diffX = sampledata[selectedPoints[i].name].x - sampledata[selectedPoints[i + 1].name].x
+                diffY = sampledata[selectedPoints[i].name].y - sampledata[selectedPoints[i + 1].name].y
+                diffZ = sampledata[selectedPoints[i].name].z - sampledata[selectedPoints[i + 1].name].z
+            }
+            diffNorm = math.norm([diffX, diffY, diffZ])
+            
+            x_com.push(diffX / diffNorm)
+            y_com.push(diffY / diffNorm)
+            z_com.push(diffZ / diffNorm)
+        }
+
+    }else{
+        x_com.length = 0
+        y_com.length = 0
+        z_com.length = 0
+
+        if(debugObject.includeOrigin){
+
+            x_com.push(0)
+            y_com.push(0)
+            z_com.push(0)
+        }
+
+        for (let selectedPoint of selectedPoints){
+            x_com.push(sampledata[selectedPoint.name].x)
+            y_com.push(sampledata[selectedPoint.name].y)
+            z_com.push(sampledata[selectedPoint.name].z)
+        }
+    }
+
+    if (debugObject.anchored == false && debugObject.GCfit == false) {
+   
+        let x_hat = math.mean(x_com)
+        let y_hat = math.mean(y_com)
+        let z_hat = math.mean(z_com)
+
+        x_com = x_com.map(x => (x - x_hat))
+        y_com = y_com.map(y => (y - y_hat))
+        z_com = z_com.map(z => (z - z_hat))
+    }
+
+    let H = math.zeros(3,3)
+
+    H.set([0, 0], math.dot(x_com, x_com))
+    H.set([0, 1], math.dot(x_com, y_com))
+    H.set([0, 2], math.dot(x_com, z_com))
+
+    H.set([1, 0], math.dot(y_com, x_com))
+    H.set([1, 1], math.dot(y_com, y_com))
+    H.set([1, 2], math.dot(y_com, z_com))
+
+    H.set([2, 0], math.dot(z_com, x_com))
+    H.set([2, 1], math.dot(z_com, y_com))
+    H.set([2, 2], math.dot(z_com, z_com))
+
+    return H
+}
+
+function car2DI(x, y, z){
+
+    let r = math.sqrt(x**2 + y**2 + z**2)
+    let dec = (math.atan2(y, x) * (180 / Math.PI) + 360) % 360
+    let inc =  math.asin(z/ r) * (180 / Math.PI)
+    return [dec, inc]
+}
+
+
+function PCA(selectedPoints){
+
+    let H = covM(selectedPoints)
+
+    let H_Mat = new Matrix(H._data)
+
+    let w = new EigenvalueDecomposition(H_Mat).realEigenvalues 
+    let v = new EigenvalueDecomposition(H_Mat).eigenvectorMatrix;
+
+    // calculate eigne values if you want to use numeric.js
+    // let w = numeric.eigen(H._data).lambda.x
+    // let v = numeric.eigen(H._data).E.x
+
+    // MAD calculation
+    // let w1 = w.indexOf(math.max(w))
+    // let w3 = w.indexOf(math.min(w))
+    // let w2 = 3 - w1 - w3
+
+    // let v1 = [v[0][w1], v[1][w1], v[2][w1]]
+    // let v2 = [v[0][w2], v[1][w2], v[2][w2]]
+    // let v3 = [v[0][w3], v[1][w3], v[2][w3]]
+
+    // MAD calculation
+    let w1 = w.indexOf(math.max(w))
+    let w3 = w.indexOf(math.min(w))
+    let w2 = 3 - w1 - w3
+
+    let v1 = [v.data[0][w1], v.data[1][w1], v.data[2][w1]]
+    let v2 = [v.data[0][w2], v.data[1][w2], v.data[2][w2]]
+    let v3 = [v.data[0][w3], v.data[1][w3], v.data[2][w3]]
+
+    let vFirstLast = vectorOfSelectedPoints(selectedPoints)
+    let PC1, PC2, PC3
+
+    if(math.dot(v1, vFirstLast) > 0){
+        PC1 = [-v1[0], -v1[1], -v1[2]]
+        PC2 = [-v2[0], -v2[1], -v2[2]]
+        PC3 = [-v3[0], -v3[1], -v3[2]]
+    }else{
+        PC1 = [v1[0], v1[1], v1[2]]
+        PC2 = [v2[0], v2[1], v2[2]]
+        PC3 = [v3[0], v3[1], v3[2]]
+    }
+
+    let cm = centerOfMass(selectedPoints)
+    let mad = Math.atan(Math.sqrt((w[w3] + w[w2])/w[w1])) * rad
+    let mad3 = Math.atan(Math.sqrt(w[w3]/w[w2] + w[w3]/w[w1])) * rad
+
+    let bestfit = car2DI(PC1[0], PC1[1], PC1[2])
+    let dang = Math.acos(math.dot(cm, PC1)/(math.norm(cm) * math.norm(PC1))) * rad
+    let originfit = car2DI(cm[0], cm[1], cm[2])
+
+    return [v1, bestfit, mad, dang, originfit, [w[w1], w[w2], w[w3]], PC1, PC2, PC3, v1, v2, v3, mad3]
+}
+
+function vectorOfSelectedPoints(selectedPoints){
+    let id = []
+    let po = []
+
+    for(let point of selectedPoints){
+        id.push(point.name)
+        po.push(point.position)
+    }
+
+    let idmax = id.indexOf(math.max(id))
+    let idmin = id.indexOf(math.min(id))
+
+    let v_x = po[idmax].x - po[idmin].x
+    let v_y = po[idmax].y - po[idmin].y
+    let v_z = po[idmax].z - po[idmin].z
+
+    return [v_x, v_y, v_z]
+}
+
+function distanceOfSelectedPoints(selectedPoints){
+    let id = []
+    let po = []
+
+    for(let point of selectedPoints){
+        id.push(point.name)
+        po.push(point.position)
+    }
+
+    let idmax = id.indexOf(math.max(id))
+    let idmin = id.indexOf(math.min(id))
+
+    return po[idmax].distanceTo(po[idmin])
+}
+
+function fisher(selectedPoints){
+
+    let x_com = []
+    let y_com = []
+    let z_com = []
+
+    let unitX, unitY, unitZ, unitNorm
+        for (let i = 0; i < selectedPoints.length; i++){
+                unitX = sampledata[selectedPoints[i].name].x
+                unitY = sampledata[selectedPoints[i].name].y
+                unitZ = sampledata[selectedPoints[i].name].z
+
+            unitNorm = math.norm([unitX, unitY, unitZ])
+            
+            x_com.push(unitX / unitNorm)
+            y_com.push(unitY / unitNorm)
+            z_com.push(unitZ / unitNorm)
+        }
+    
+    let n = x_com.length
+
+    let sumx = math.sum(x_com)
+    let sumy = math.sum(y_com)
+    let sumz = math.sum(z_com)
+
+    let r = math.norm([sumx, sumy, sumz])
+
+    let k = (n - 1) / (n - r)
+    let p63 = 0.37
+    let p95 = 0.05
+
+    let a63 = math.acos(1 - ((n - r)/r) * ((1 / p63)**(1/(n-1)) - 1)) * rad
+    let a95 = math.acos(1 - ((n - r)/r) * ((1 / p95)**(1/(n-1)) - 1)) * rad
+
+    let dec = math.atan2(sumy, sumx) * rad
+    let inc = math.asin(sumz/r) * rad
+    
+    return [[x_com, y_com, z_com], n, r, k, a95, a63, dec, inc, [sumx/r, sumy/r, sumz/r]]
+}
+
+
+let meanl
+function drawFisherLine(selectedPoints){
+    scene.remove( meanl )
+
+    if (debugObject.FisherMeanLine){
+
+        let rVector = fisher(selectedPoints)[8]
+
+        let meanLine = []
+
+        meanLine.push( new THREE.Vector3( 0, 0, 0 ) )
+        meanLine.push( new THREE.Vector3( rVector[0], rVector[1], rVector[2] ).multiplyScalar( 50 ) )
+        meanLine.push( new THREE.Vector3( rVector[0], rVector[1], rVector[2] ).multiplyScalar( -50 ))
+
+        
+        let meanLineGeometry = new THREE.BufferGeometry().setFromPoints( meanLine )
+    
+        meanl = new THREE.Line( meanLineGeometry, PCALineMaterial )
+        scene.add( meanl )
+    }
+}
+
+
+
+
+let a95cone 
+function drawa95Cone(selectedPoints){
+    scene.remove( a95cone  )
+    if (debugObject.Fishera95Cone){
+
+        let rVector = fisher(selectedPoints)[8]
+        let a95 = fisher(selectedPoints)[4] / rad
+        let h = 1 / math.tan(a95)
+
+        let a95coneGeometry = new THREE.ConeGeometry( 1, h, 36 , 1, true);
+        a95coneGeometry.scale(50/h, 50/h, 50/h)
+  
+        let a95coneMaterial = new THREE.MeshBasicMaterial( { color: purpleColor} )
+        a95coneMaterial.wireframe = true
+        
+        // a95coneMaterial.transparent = true
+        // a95coneMaterial.opacity = 0.2
+        //a95coneMaterial.side = THREE.DoubleSide
+
+        a95cone = new THREE.Mesh(a95coneGeometry, a95coneMaterial)
+        a95cone.position.x = rVector[0] * 25
+        a95cone.position.y = rVector[1] * 25
+        a95cone.position.z = rVector[2] * 25
+ 
+        a95cone.quaternion.setFromUnitVectors ( new THREE.Vector3(0, -1, 0), new THREE.Vector3( rVector[0], rVector[1], rVector[2] ).normalize() ) 
+        
+
+        scene.add(a95cone)
+    }
+}
+
+
+
+let bfl
+function drawBFL(selectedPoints){
+    scene.remove( bfl )
+    if (debugObject.bestFitLine){
+        let com = centerOfMass(selectedPoints)
+        let dsp = distanceOfSelectedPoints(selectedPoints)
+        let pca = PCA(selectedPoints)[0]
+
+        if(debugObject.anchored){
+            dsp = dsp * 5
+        }
+
+        let bestFitLine = []
+
+        bestFitLine.push( new THREE.Vector3( com[0]*scale, com[1]*scale, com[2]*scale ) )
+        bestFitLine.push( new THREE.Vector3( com[0]*scale - pca[0] * dsp/2, com[1]*scale - pca[1] * dsp/2, com[2]*scale - pca[2] * dsp/2 ) )
+        bestFitLine.push( new THREE.Vector3( com[0]*scale + pca[0] * dsp/2, com[1]*scale + pca[1] * dsp/2, com[2]*scale + pca[2] * dsp/2 ) )
+
+        
+        let bestFitLineGeometry = new THREE.BufferGeometry().setFromPoints( bestFitLine )
+    
+        bfl = new THREE.Line( bestFitLineGeometry, PCALineMaterial )
+        scene.add( bfl )
+    }
+}
+
+let ol
+function drawOriginLine(selectedPoints){
+    scene.remove( ol )
+    if (debugObject.DANG){
+        let cm = centerOfMass(selectedPoints)
+    
+        let originLine = []
+        originLine.push( oriVec );
+        originLine.push( new THREE.Vector3( cm[0] * scale, cm[1] * scale, cm[2] * scale))
+        const originLineGeometry = new THREE.BufferGeometry().setFromPoints( originLine )
+    
+        ol = new THREE.Line( originLineGeometry, lineMaterial )
+        scene.add( ol )
+    }
+}
+
+let pole
+function drawPole(selectedPoints){
+    scene.remove( pole )
+    if (debugObject.poleLine){
+        let com = centerOfMass(selectedPoints)
+        let dsp = distanceOfSelectedPoints(selectedPoints)
+        let pca = PCA(selectedPoints)[8]
+
+        if(debugObject.anchored){
+            dsp = dsp * 5
+        }
+
+        let poleLine = []
+
+        poleLine.push( new THREE.Vector3( com[0]*scale, com[1]*scale, com[2]*scale ) )
+        poleLine.push( new THREE.Vector3( com[0]*scale - pca[0] * dsp/2, com[1]*scale - pca[1] * dsp/2, com[2]*scale - pca[2] * dsp/2 ) )
+        poleLine.push( new THREE.Vector3( com[0]*scale + pca[0] * dsp/2, com[1]*scale + pca[1] * dsp/2, com[2]*scale + pca[2] * dsp/2 ) )
+
+        
+        let poleLineGeometry = new THREE.BufferGeometry().setFromPoints( poleLine )
+    
+        pole = new THREE.Line( poleLineGeometry, PCALineMaterial )
+        scene.add( pole )
+    }
+}
+
+let comPlane
+function drawPlane(selectedPoints){
+    scene.remove( comPlane )
+    if (debugObject.planeFit){
+        let pca = PCA(selectedPoints)[8]
+        let com = centerOfMass(selectedPoints)
+        //let dsp = distanceOfSelectedPoints(selectedPoints)
+
+        let pcaVector1 = new THREE.Vector3( pca[0], pca[1], pca[2] ).normalize()
+        let comPlaneGeometry = new THREE.PlaneGeometry(20, 20, 50, 50)
+        //let comPlaneMaterial = new THREE.MeshBasicMaterial( { color: 0x59d1c1} )
+        let comPlaneMaterial = new THREE.MeshBasicMaterial( { color: purpleColor} )
+        comPlaneMaterial.wireframe = true
+        // comPlaneMaterial.transparent = true
+        // comPlaneMaterial.opacity = 0.2
+        // comPlaneMaterial.side = THREE.DoubleSide
+
+        comPlane = new THREE.Mesh(comPlaneGeometry, comPlaneMaterial)
+        comPlane.quaternion.setFromUnitVectors ( new THREE.Vector3(0, 0, 1), pcaVector1 ) 
+        
+        comPlane.position.x = com[0] * scale
+        comPlane.position.y = com[1] * scale
+        comPlane.position.z = com[2] * scale
+
+
+        scene.add(comPlane)
+    }
+}
+
+
+let comOctahedron
+function drawCenterOfMass(selectedPoints){
+    scene.remove( comOctahedron )
+    if (debugObject.centerOfMass){
+        let cm = centerOfMass(selectedPoints)
+
+        let comGeometry = new THREE.OctahedronGeometry(1)
+        comOctahedron = new THREE.Line( comGeometry, lineMaterial )
+
+        comOctahedron.position.x = cm[0] * scale
+        comOctahedron.position.y = cm[1] * scale
+        comOctahedron.position.z = cm[2] * scale
+        
+        scene.add( comOctahedron ) 
+    } 
+}
+
+let diffVectorSet = []
+let comGCSphere
+function drawGCSphere(selectedPoints){
+    scene.remove( comGCSphere )
+
+    for(let testvector of diffVectorSet){
+        scene.remove(testvector)
+    }
+
+    diffVectorSet.length = 0
+
+    if(debugObject.GCfitSphere){
+        let gcSphereMaterial = new THREE.MeshBasicMaterial( { color: lineColor } )
+        gcSphereMaterial.wireframe = true
+        let gcSphereGeometry = new THREE.SphereGeometry( 10 , 36, 18 )
+        comGCSphere = new THREE.Mesh( gcSphereGeometry, gcSphereMaterial )
+
+        let diffVectors = getDiffVectors(selectedPoints)
+
+        for (let i = 0; i < diffVectors[0].length; i++){
+            let diffx = diffVectors[0][i] * 10
+            let diffy = diffVectors[1][i] * 10
+            let diffz = diffVectors[2][i] * 10
+
+            addSphere(diffVectorSet, diffx, diffy, diffz, purpleColor, i, 1)
+        }
+
+        scene.add(comGCSphere)
+    }
+}
+
+let comEllipsoid
+function drawEllipsoid(selectedPoints){
+
+    scene.remove( comEllipsoid )
+
+    if(debugObject.covEllipsoid){
+        let dsp = distanceOfSelectedPoints(selectedPoints) / 2
+        let cm = centerOfMass(selectedPoints)
+
+        let w1 = PCA(selectedPoints)[5][0] 
+        let w2 = PCA(selectedPoints)[5][1] 
+        let w3 = PCA(selectedPoints)[5][2] 
+
+        let comEllipsoidMaterial = new THREE.MeshBasicMaterial( { color: 0x59d1c1} )
+        comEllipsoidMaterial.wireframe = true
+
+        let comEllipsoidGeometry = new THREE.SphereGeometry( dsp , 32, 32 )
+
+        if(debugObject.anchored){
+            comEllipsoidGeometry.scale(math.log(w2 / w3 * 10)/5 * 2 , math.log(w1 / w3 * 10)/5 * 2 , math.log(w3 / w3 * 10)/5 * 2)
+        }else{
+            comEllipsoidGeometry.scale(math.log(w2 / w3 * 10)/5 , math.log(w1 / w3 * 10)/5  , math.log(w3 / w3 * 10)/5)
+            //comEllipsoidGeometry.scale(math.sqrt(w2 / w1)* 2, math.sqrt(w1 / w1) * 2 , math.sqrt(w3 / w1) * 2)
+            //comEllipsoidGeometry.scale(math.sqrt(w2 / w1), math.sqrt(w1 / w1) , math.sqrt(w3 / w1))
+        }
+        // general scaler but not really good for vizualization
+        // comEllipsoidGeometry.scale(w2 / w1, w1 / w1 , w3 / w1)
+
+        comEllipsoid = new THREE.Mesh( comEllipsoidGeometry, comEllipsoidMaterial )
+
+        let pca1 = PCA(selectedPoints)[6]
+        let pca2 = PCA(selectedPoints)[7]
+        let pca3 = PCA(selectedPoints)[8]
+        
+        let pcaVector1 = (new THREE.Vector3(pca1[0], pca1[1], pca1[2])).normalize()
+        let pcaVector2 = (new THREE.Vector3(pca2[0], pca2[1], pca2[2])).normalize()
+        let pcaVector3 = (new THREE.Vector3(pca3[0], pca3[1], pca3[2])).normalize()
+        
+        // rotate to match y component to long axis 
+        let nVector = (new THREE.Vector3(0, 1, 0)).cross(pcaVector1).normalize()
+        let theta = math.acos( pcaVector1.y )
+        comEllipsoid.rotateOnAxis( nVector, theta )
+
+        // actual solution but it does not work somehow
+
+        // if(pcaVector1.clone().cross(pcaVector2).dot(pcaVector3) < 0){
+        //     pcaVector3 = pcaVector3.multiplyScalar(-1)}
+        // let a1 = [pcaVector2.dot(nVector), pcaVector3.dot(nVector)]
+        // let a2 = [nVector.x, nVector.z]
+        // let phi = math.acos(math.dot(a1, a2))
+        // comEllipsoid.rotateOnAxis( new THREE.Vector3(0,1,0), -phi*ss )
+
+        // track short axis
+        let firstRotateEuler = new Euler(comEllipsoid.rotation._x, comEllipsoid.rotation._y, comEllipsoid.rotation._z, 'XYZ')
+        let v3 = new THREE.Vector3(0, 0, 1)
+        v3.applyEuler(firstRotateEuler).normalize()
+
+        // calculate angle between tracked short axis and actual min axis
+        let phi = Math.acos(pcaVector3.dot(v3)) 
+        if (pcaVector3.cross(v3).dot(pcaVector1) > 0){ phi = -phi }
+        
+        comEllipsoid.rotateOnAxis( new THREE.Vector3(0, 1, 0), phi )
+ 
+        comEllipsoid.position.x = cm[0] * scale
+        comEllipsoid.position.y = cm[1] * scale
+        comEllipsoid.position.z = cm[2] * scale
+        
+        scene.add(comEllipsoid)
+    }
+
+}
+
+let normVectorSet = []
+let fisherSphere
+function drawFisherSphere(selectedPoints){
+    scene.remove( fisherSphere )
+
+    for(let testvector of normVectorSet){
+        scene.remove(testvector)
+    }
+
+    normVectorSet.length = 0
+
+    if(debugObject.FisherSphere){
+        let fisherSphereMaterial = new THREE.MeshBasicMaterial( { color: lineColor } )
+        fisherSphereMaterial.wireframe = true
+        let fisherSphereGeometry = new THREE.SphereGeometry( 50 , 36, 18 )
+        fisherSphere = new THREE.Mesh( fisherSphereGeometry, fisherSphereMaterial )
+
+        let normVectors = fisher(selectedPoints)[0]
+
+        console.log(normVectors)
+
+        for (let i = 0; i < normVectors[0].length; i++){
+            let normx = normVectors[0][i] * 50
+            let normy = normVectors[1][i] * 50
+            let normz = normVectors[2][i] * 50
+
+            addSphere(normVectorSet, normx, normy, normz, purpleColor, i, 1)
+        }
+
+        scene.add( fisherSphere )
+    }
+}
+
+
+/**
+ * Sizes
+ */
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+window.addEventListener('resize', () =>
+{
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(95, sizes.width / sizes.height, 0.1, 10000)
+camera.position.set( 25, 25, 100 );
+scene.add(camera)
+
+// Controls
+const controls = new OrbitControls(camera, canvas)
+controls.target.set(0, 0, 0)
+controls.enableDamping = true
+controls.maxDistance = 200
+controls.minDistance = 10
+
+/**
+ * Raycaster
+ */
+const raycaster = new THREE.Raycaster()
+const raycasterGrid = new THREE.Raycaster()
+const pointer = new THREE.Vector2()
+
+
+/**
+ * Mouse
+ */
+
+const mouse = new THREE.Vector2()
+
+window.addEventListener('mousemove', (event) =>
+{
+    mouse.x = event.clientX / sizes.width * 2 - 1
+    mouse.y = - (event.clientY / sizes.height) * 2 + 1
+})
+
+
+
+
+function removeItemOnce(arr, value) {
+    let index = arr.indexOf(value)
+    if (index > -1) {
+      arr.splice(index, 1)
+    }
+    return arr
+}
+
+
+window.addEventListener('click', () =>
+{
+    if(currentIntersect)
+    {
+        if(selectedPoints.includes(currentIntersect.object)){
+            playUnSelectionSound()
+            removeItemOnce(selectedPoints, currentIntersect.object)
+
+        }else{
+            
+            playSelectionSound()
+            selectedPoints.push(currentIntersect.object)
+            currentIntersect.object.material.color.set('#00ffff')
+        }
+    }
+})
+
+
+
+function menubarText(n, cm, pcaUtils, fisherUtils){
+    if (debugObject.unanchored || debugObject.anchored || debugObject.includeOrigin){
+
+        let type = 'line unanchored fit'
+
+        if(debugObject.anchored){ 
+            type = 'line anchored fit'
+        }
+
+        if(debugObject.includeOrigin){ 
+            n = n + 1 
+            type = 'origin incluced line unanchored fit'
+        }
+
+        menubar.innerText = 
+        '  |  type: ' + type
+        + '\n'
+        + '  |  n: '         + n
+        + '  |  MAD1: '     +  Math.round(pcaUtils[2] * 100) / 100 + '\xB0'
+        + '  |  MAD3: '     +  Math.round(pcaUtils[12] * 100) / 100 + '\xB0'
+        + '  |  DANG: '    +  Math.round(pcaUtils[3] * 100) / 100 + '\xB0'
+        + '\n'
+        + '  |  Dec: ' +  Math.round(pcaUtils[1][0] * 100) / 100 + '\xB0'
+        + '  |  Inc: ' +  Math.round(pcaUtils[1][1] * 100) / 100 + '\xB0'
+        + '  |  CM Dec: '    +  Math.round(pcaUtils[4][0] * 100) / 100 + '\xB0'
+        + '  |  CM Inc: '    +  Math.round(pcaUtils[4][1] * 100) / 100 + '\xB0'
+
+
+
+        menubar2.innerText = 
+        '  |  PCA1: ' + pcaUtils[6][0].toPrecision(3) + ', ' + pcaUtils[6][1].toPrecision(3) + ', '+  pcaUtils[6][2].toPrecision(3)
+        + '\n'
+        + '  |  lamda: ' + pcaUtils[5][0].toPrecision(3) + ', ' + pcaUtils[5][1].toPrecision(3) + ', '+  pcaUtils[5][2].toPrecision(3)
+        + '\n'
+        + '  |  CM: ' + cm[0].toExponential(2) + ', ' + cm[1].toExponential(2) + ', '+  cm[2].toExponential(2)
+    }
+
+    if (debugObject.GCfit){
+
+        menubar.innerText = 
+        '  |  type: ' + 'great circle fit'
+        + '\n'
+        + '  |  n: '         + n
+        + '  |  MAD: '     +  Math.round(pcaUtils[2] * 100) / 100 + '\xB0'
+        + '  |  DANG: '    +  Math.round(pcaUtils[3] * 100) / 100 + '\xB0'
+        + '\n'
+        + '  |  Dec: ' +  Math.round(pcaUtils[1][0] * 100) / 100 + '\xB0'
+        + '  |  Inc: ' +  Math.round(pcaUtils[1][1] * 100) / 100 + '\xB0'
+        + '  |  CM Dec: '    +  Math.round(pcaUtils[4][0] * 100) / 100 + '\xB0'
+        + '  |  CM Inc: '    +  Math.round(pcaUtils[4][1] * 100) / 100 + '\xB0'
+
+        menubar2.innerText = 
+        '  |  PCA3: ' + pcaUtils[8][0].toPrecision(3) + ', ' + pcaUtils[8][1].toPrecision(3) + ', '+  pcaUtils[8][2].toPrecision(3)
+        + '\n'
+        + '  |  lamda: ' + pcaUtils[5][0].toPrecision(3) + ', ' + pcaUtils[5][1].toPrecision(3) + ', '+  pcaUtils[5][2].toPrecision(3)
+        + '\n'
+        + '  |  CM: ' + cm[0].toExponential(2) + ', ' + cm[1].toExponential(2) + ', '+  cm[2].toExponential(2)
+
+    }
+
+    if (debugObject.Fisher){
+
+        console.log('s')
+        menubar.innerText = 
+        '  |  type: ' + 'fisher statistics'
+        + '\n'
+        + '  |  n: '         + fisherUtils[1]
+        + '  |  r: '     +  fisherUtils[2].toPrecision(3)
+        + '  |  k: '     +  fisherUtils[3].toPrecision(3)
+        + '  |  a95: '    +  fisherUtils[4].toPrecision(2) + '\xB0'
+        + '  |  a63: '    +  fisherUtils[5].toPrecision(2) + '\xB0'
+        + '\n'
+        + '  |  Dec: ' +  Math.round(fisherUtils[6] * 100) / 100 + '\xB0'
+        + '  |  Inc: ' +  Math.round(fisherUtils[7] * 100) / 100 + '\xB0'
+
+        menubar2.innerText = ''
+
+    }
+    
+}
+
+function render(){
+
+
+    playCalculationSound()
+
+    if (debugObject.includeOrigin){
+        scene.add(originPoint, originPoint1, originPoint2, originPoint3, originPoint4, originPoint5, originPoint6)
+    }else{
+        scene.remove(originPoint, originPoint1, originPoint2, originPoint3, originPoint4, originPoint5, originPoint6)
+    }
+
+    let pcaUtils = PCA(selectedPoints)
+    let cm = centerOfMass(selectedPoints)
+    let n = selectedPoints.length 
+    let fisherUtils = fisher(selectedPoints)
+
+    menubarText(n, cm, pcaUtils, fisherUtils)
+
+
+    drawBFL(selectedPoints)
+    drawOriginLine(selectedPoints)
+    drawCenterOfMass(selectedPoints)
+    drawEllipsoid(selectedPoints)
+    drawPole(selectedPoints)
+    drawPlane(selectedPoints)
+    drawGCSphere(selectedPoints)
+    drawFisherSphere(selectedPoints)
+    drawFisherLine(selectedPoints)
+    drawa95Cone(selectedPoints)
+
+}
+
+document.body.onkeyup = function(e) {
+    if (e.key == " " ||
+        e.code == "Space" ||      
+        e.keyCode == 32      
+    ) {
+        render()
+    }
+}
+
+window.addEventListener('contextmenu', (event) => {
+    render()
+  })
+
+/**
+ * Renderer
+ */
+const renderer = new THREE.WebGLRenderer({
+    canvas: canvas
+})
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+/**
+ * Animate
+ */
+const clock = new THREE.Clock()
+let previousTime = 0
+
+
+function fillBaseColor(intersection, vSet, baseColor)
+{
+    for(const object of vSet)
+    {
+        if(!intersection.find(intersection => intersection.object === object))
+            {
+                object.material.color.set(baseColor)
+            }
+    }
+}
+
+function fillSelectedColor(selectedPoint, vSet, selectedColor)
+{
+    for(let selectedShadow of vSet){
+        if(selectedShadow.name == selectedPoint.name)
+        {
+            selectedShadow.material.color.set(selectedColor)
+        }
+    }
+}
+
+const tick = () =>
+{
+    
+    const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - previousTime
+    previousTime = elapsedTime
+
+    raycaster.setFromCamera(mouse, camera)
+    const intersects = raycaster.intersectObjects(v0)
+
+    fillBaseColor(intersects, v0, mainColor)
+    fillBaseColor(intersects, v1, shadowColor)
+    fillBaseColor(intersects, v2, shadowColor)
+    fillBaseColor(intersects, v3, shadowColor)
+    fillBaseColor(intersects, v4, shadowColor)
+    fillBaseColor(intersects, v5, shadowColor)
+    fillBaseColor(intersects, v6, shadowColor)
+
+
+    for(let selectedPoint of selectedPoints)
+    {
+        selectedPoint.material.color.set(selectedColor)
+
+        fillSelectedColor(selectedPoint, v1, selectedColor)
+        fillSelectedColor(selectedPoint, v2, selectedColor)
+        fillSelectedColor(selectedPoint, v3, selectedColor)
+        fillSelectedColor(selectedPoint, v4, selectedColor)
+        fillSelectedColor(selectedPoint, v5, selectedColor)
+        fillSelectedColor(selectedPoint, v6, selectedColor)
+    }
+
+    if(intersects.length)
+    {
+        currentIntersect = intersects[0]
+    }
+    else
+    {
+        currentIntersect = null
+    }
+
+
+    for(const point of points)
+    {
+        const screenPosition = point.position.clone()
+        screenPosition.project(camera)
+
+        const translateX = screenPosition.x * sizes.width * 0.5
+        const translateY = - screenPosition.y * sizes.height * 0.5
+        point.element.style.transform = `translateX(${translateX}px) translateY(${translateY}px)`
+
+        if(currentIntersect)
+        {
+            document.getElementsByClassName('webgl')[0].classList.add('pointer')
+
+            if (currentIntersect.object.name == point.number)
+            {
+                point.element.classList.add('visible')
+                currentIntersect.object.material.color.set(toggleColor)
+
+                fillSelectedColor(currentIntersect.object, v1, toggleColor)
+                fillSelectedColor(currentIntersect.object, v2, toggleColor)
+                fillSelectedColor(currentIntersect.object, v3, toggleColor)
+                fillSelectedColor(currentIntersect.object, v4, toggleColor)
+                fillSelectedColor(currentIntersect.object, v5, toggleColor)
+                fillSelectedColor(currentIntersect.object, v6, toggleColor)
+            }
+            else
+            {
+                point.element.classList.remove('visible')
+            }
+            
+        }else
+        {
+            point.element.classList.remove('visible')
+            document.getElementsByClassName('webgl')[0].classList.remove('pointer')
+        }
+        raycasterGrid.setFromCamera(screenPosition, camera)
+        }
+        
+
+    // Update controls
+    controls.update()
+
+    // Render
+    renderer.render(scene, camera)
+
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick)
+}
+
+tick()
+</script>
+</body>
+</html>
