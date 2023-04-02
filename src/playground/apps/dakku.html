@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Dakku </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- <link href="../../output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../style.css"> -->
+    <style>
+        html,
+        body
+        {
+            overflow: hidden;
+            background-image: linear-gradient(130deg, #fceefd, #f4f1fd, rgb(235, 244, 253)) ;
+        }
+
+        #container
+        {
+            display: flex;
+            margin-left: 5%; 
+            margin-right: 5%;
+            width: 100vw;
+            height: 100vh;
+            flex-direction: row;
+            align-items: center;
+            background-color: transparent;
+            gap: 5%;
+        }
+
+        #linev
+        {
+            position: absolute;
+            width: 50vw;
+            height: 90vh;
+            background-color: transparent;
+            background-image: linear-gradient(90deg, transparent 95%, rgba(182, 180, 180, 0.284) 5%);
+            background-size: 10px 10px;
+            background-repeat: repeat;
+        }
+
+        #linew
+        {
+            position: absolute;
+            width: 50vw;
+            height: 90vh;
+            background-color: transparent;
+            background-image: linear-gradient(180deg, transparent 95%, rgba(182, 180, 180, 0.284) 5%);
+            background-size: 10px 10px;
+            background-repeat: repeat;
+        }
+
+        #paper
+        {
+            display: flex;
+            width: 50vw;
+            height: 90vh;
+            background-color: rgb(253, 239, 236);
+            border-radius: 5px;
+        }
+
+        #sticker
+        {
+            width: 400px;
+            height: 90vh;
+            background-color: transparent;
+            border-radius: 5px;
+            border-style: solid;
+        }
+
+        #write
+        {
+            /* position: absolute; */
+            top: 0;
+            left: 0;
+        }
+
+        #canvas
+        {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #logo 
+        {
+            top: 0;
+            right: 10px;
+            width: 20vh;
+            height: 20vh;
+            opacity: 1;
+        }
+
+        .draggable {
+            position: absolute;
+            z-index: 9;
+        }
+
+        .draggable:hover{
+            cursor: move;
+            opacity: 0.5;
+        }
+
+
+        #cursor
+        {
+            position: absolute;
+            top: 0;
+            right: 10px;
+            width: 20vh;
+            height: 20vh;
+            opacity: 1;
+        }
+
+
+        #quote {
+        padding: 10px;
+        cursor: move;
+        z-index: 10;
+        background-color: #2195f321;
+        color: rgb(108, 107, 109);
+        }
+
+ 
+
+        
+
+    </style>
+
+
+</head>
+<body>
+    <!-- make a div -->
+    <div id="container">
+        <canvas id="canvas"></canvas>
+        <!-- make a div -->
+        <div id="paper"> 
+            <div id="linev"></div>
+            <div id="linew"></div>
+            <p id="date" style="font-size: large; font-family: monospace; margin-left: 30px;"></p>
+            <div class="draggable" id="write" style="width: 100px; top: 35vh; right: 5vw;">
+                <img src = "../static/images/write.png" style="width: 100px;">
+                <div id="btn"> write </div>
+                </div>
+        
+        </div>
+
+        <div id="sticker">
+        <img class="draggable" id="logo" src="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" style="width: 150px; border-radius: 50%; top: 0; right: 5vw;">
+        <img class="draggable" id="logo1" src="../static/images/star.png" style="width: 100px; border-radius: 50%; top: 10vh; right: 15vw;">
+        <img class="draggable" id="logo2" src="../static/images/rabbitgo.png" style="width: 150px; border-radius: 10%; top: 15vh; right: 25vw;">
+        <img class="draggable" id="logo3" src="../static/images/title.png" style="width: 200px; border-radius: 5%; top: 5vh; right: 20vw;">
+        <img class="draggable" id="lunardynamo" src="../static/images/lunardynamo.svg" style="width: 200px; border-radius: 50%; top: 20vh; right: 5vw;">
+        <img class="draggable" id="lunardynamo-sticker" src="../static/images/lunardynamo_sticker.png" style="width: 200px; top: 35vh; right: 5vw;">
+        <img class="draggable" id="quote-armstrong" src="../static/images/quote-armstrong.svg" style="width: 300px; top: 35vh; right: 5vw;">
+        
+        <div class="draggable" id="quote" style="font-family: Arial, Helvetica, sans-serif;"> APOLLO 11 </div>
+    </div>
+
+    </div>
+
+    <!-- insert an image -->
+
+    <script type="module">
+
+        import html2canvas from 'html2canvas';
+
+        let dragElementId = ["logo", "logo1", "logo2", "logo3", "lunardynamo", "lunardynamo-sticker", "quote-armstrong", "write", "quote"];
+
+        for (var i = 0; i < dragElementId.length; i++) {
+            dragElement(document.getElementById(dragElementId[i]));
+        }
+
+        function dragElement(elmnt) {
+
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        elmnt.onmousedown = dragMouseDown;
+
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            /* stop moving when mouse button is released:*/
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+}
+
+    //btn click event
+    document.getElementById("btn").onclick = function() {
+        var input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "write a note :)";
+        input.id = "input";
+ 
+        var write = document.getElementById("write");
+        input.style.top = write.style.top;
+        input.style.left = write.style.left;
+        input.style.display = "flex";
+        input.style.width = "45vw";
+        input.style.height = "100px";
+        input.style.position = "absolute";
+        input.style.border = "none";
+        input.style.textAlign = "center";
+        input.style.fontFamily = "Helvetica, sans-serif"
+        input.style.fontSize = "30px";
+        input.style.color = "rgb(108, 107, 109)";
+        input.style.backgroundColor = "transparent";
+        // append the input element to the body
+        document.body.appendChild(input);
+    
+        input.focus();
+        dragElement(input);
+    }
+
+var today = new Date();
+var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+document.getElementById("date").innerHTML = date;
+
+const container = document.getElementById('container');
+
+//saveSelectedAreaAsImage(container, 'image.png')
+//saveSelectedAreaAsImage(container,100, 100, 'image.png')
+
+function saveSelectedAreaAsImage(element, fileName = 'image.png') {
+  // Create a hidden canvas element
+  const canvas = document.createElement('canvas');
+  canvas.style.display = 'none';
+  document.body.appendChild(canvas);
+    canvas.width = 1500 // canvas width same as the element
+    canvas.height = 2000;
+     
+
+  // Render the selected area to the canvas
+  html2canvas(element, { canvas }).then((canvas) => {
+    // Convert the canvas to a data URL (Base64 encoded image)
+    const dataURL = canvas.toDataURL('image/png');
+
+    // Create an anchor element and trigger a download
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = fileName;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up the hidden elements
+    document.body.removeChild(link);
+    document.body.removeChild(canvas);
+  });
+}
+
+//console the size of the paper
+console.log(container.offsetWidth, container.offsetHeight)
+
+function saveSelectedAreaAsImageWithSize(element, width, height, fileName = 'image.png') {
+  // Create a new element with the desired dimensions
+  const resizedElement = element.cloneNode(true);
+  resizedElement.style.width = `${width}px`;
+  resizedElement.style.height = `${height}px`;
+  resizedElement.style.position = 'fixed';
+  resizedElement.style.left = '-9999px';
+  document.body.appendChild(resizedElement);
+
+  // Create a hidden canvas element
+  const canvas = document.createElement('canvas');
+  canvas.style.display = 'none';
+  document.body.appendChild(canvas);
+
+  // Render the resized element to the canvas
+  html2canvas(resizedElement, { canvas }).then((canvas) => {
+    // Convert the canvas to a data URL (Base64 encoded image)
+    const dataURL = canvas.toDataURL('image/png');
+
+    // Create an anchor element and trigger a download
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = fileName;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up the hidden elements
+    document.body.removeChild(link);
+    document.body.removeChild(canvas);
+    document.body.removeChild(resizedElement);
+  });
+}
+
+
+// html2canvas(document.querySelector("#write")).then(
+//     canvas => {
+//     const dataURL = canvas.toDataURL('image/png');
+
+//     // Create an anchor element and trigger a download
+//     const link = document.createElement('a');
+//     link.href = dataURL;
+//     link.download = fileName;
+//     link.style.display = 'none';
+//     document.body.appendChild(link);
+//     link.click();
+
+//     // Clean up the hidden elements
+//     document.body.removeChild(link);
+//     document.body.removeChild(canvas);
+//   });
+
+
+
+
+// make a code that user can select the background color of id = paper
+var paper = document.getElementById("paper");
+// paper.style.backgroundColor = "red";
+
+    </script>
+</body>
+
+</html>
