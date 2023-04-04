@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Apollo Mini Game</title>
+<style>
+body {
+    background-image: url("../static/images/apollolandingsite.png");
+    background-size: 1000px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#victory-screen {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 50px;
+  border-radius: 10px;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#victory-screen h1 {
+  font-size: 48px;
+  margin-bottom: 30px;
+}
+
+#mute {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #fff;
+  color: #000;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#credits {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: #fff;
+}
+
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<img id="module" src="../static/images/apollolandingmodule_.svg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width:100px;  " />
+
+<audio id="background-music" src="../static/sounds/background-music.mp3"></audio>
+<audio id="hit-sound" src="../static/sounds/hit-sound.wav"></audio>
+<audio id="score-sound" src="../static/sounds/score-sound.wav"></audio>
+<audio id="finish-sound" src="../static/sounds/finish-sound.wav"></audio>
+
+<div id="victory-screen">
+  <h1>Congratulations!</h1>
+  <p>You collected all the Apollo samples!</p>
+</div>
+
+<div id="mute">Mute sound</div>
+<div id="credits">This minigame is made by ChatGPT and Dalle with minor revisions. How amazing! <br>
+  The background music is made by 
+  <a href="https://jsuh.notion.site/jsuh/2661135508914db09552f17e1485a73f" target="_blank">Jay suh</a>
+</div>
+
+</body>
+
+
+<script type="module">
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+
+// Set canvas size to window size
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const muteButton = document.getElementById("mute");
+const sounds = document.getElementsByTagName("audio");
+
+let isMuted = false;
+muteButton.addEventListener("click", function() {
+  isMuted = !isMuted;
+  for (let i = 0; i < sounds.length; i++) {
+    sounds[i].muted = isMuted;
+  }
+  muteButton.textContent = isMuted ? "Unmute sound" : "Mute sound";
+});
+
+
+// Load astronaut image
+const astronaut = new Image();
+astronaut.src = "../static/images/astronaut.svg";
+
+// Load star image
+const star = new Image();
+star.src = "../static/images/rock.svg";
+
+// Load rabbit image
+const rabbit = new Image();
+rabbit.src = "../static/images/rabbit.svg";
+
+// Game state
+let x = 50;
+let y = 50;
+let speed = 25;
+let isRed = false;
+
+// Samples
+const numStars = 15;
+const stars = [];
+for (let i = 0; i < numStars; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    collected: false
+  });
+}
+
+// Rabbit
+const numRabbits = 10;
+const rabbits = [];
+for (let i = 0; i < numRabbits; i++) {
+  rabbits.push({
+    x: canvas.width + 50 + Math.random() * 200,
+    y: Math.random() * canvas.height,
+    speed: 3 + Math.random() * 3,
+    frameCount: Math.floor(Math.random() * 60)
+  });
+}
+
+// Score
+let score = 0;
+
+// Game loop
+let startTime = Date.now();
+
+// play background music  
+const bgm = document.getElementById("background-music");
+bgm.volume = 0.1; 
+bgm.play();
+
+function gameLoop() {
+  
+  const timeElapsed = (Date.now() - startTime) / 1000;
+
+  if (timeElapsed >= 30) {
+    // Game over, time is up
+    document.getElementById("background-music").pause();
+    document.getElementById("game-over-screen").style.display = "block";
+  } else if (stars.every(star => star.collected)) {
+    // Victory, all stars collected within time limit
+    showVictoryScreen();
+  }else{
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw stars
+  for (let i = 0; i < stars.length; i++) {
+    if (!stars[i].collected) {
+      ctx.drawImage(star, stars[i].x, stars[i].y, 50, 40);
+    }
+  }
+
+  // Draw rabbits
+  for (let i = 0; i < rabbits.length; i++) {
+    ctx.drawImage(rabbit, rabbits[i].x, rabbits[i].y, 50, 50);
+  }
+
+  // Draw character
+  if (isRed) {
+  ctx.globalAlpha = 0.5;
+  }else{
+  ctx.globalAlpha = 1;
+  }
+  ctx.drawImage(astronaut, x, y, 50, 80);
+  ctx.globalAlpha = 1;
+  // Draw score and time remaining
+    ctx.font = "24px Arial";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Score: " + score, 10, 30);
+    ctx.fillText("Time: " + (30 - Math.floor(timeElapsed)), 10, 60);
+
+  // Check for collision with stars
+  for (let i = 0; i < stars.length; i++) {
+    if (!stars[i].collected) {
+      if (x < stars[i].x + 50 && x + 50 > stars[i].x && y < stars[i].y + 50 && y + 50 > stars[i].y) {
+        stars[i].collected = true;
+        score += 10;
+        const hitSound = document.getElementById("hit-sound");
+        hitSound.volume = 0.1;
+        hitSound.currentTime = 0;
+        hitSound.play();
+        setTimeout(function() {
+          hitSound.pause();
+        }, 1000);
+      }
+    }
+  }
+
+// Check for collision with rabbits
+for (let i = 0; i < rabbits.length; i++) {
+    if (x < rabbits[i].x + 50 && x + 50 > rabbits[i].x && y < rabbits[i].y + 50 && y + 50 > rabbits[i].y) {
+      score -= 10;
+      rabbits[i].x = canvas.width + 50 + Math.random() * 200;
+      rabbits[i].y = Math.random() * canvas.height;
+      rabbits[i].speed = 3 + Math.random() * 3;
+      const hitSound = document.getElementById("score-sound");
+      hitSound.currentTime = 0;
+      hitSound.volume = 0.1;
+      hitSound.play();
+      isRed = true;
+      setTimeout(function() {
+        hitSound.pause();
+        isRed = false;
+      }, 1000);
+    }
+  }
+
+  // Update rabbit positions
+  for (let i = 0; i < rabbits.length; i++) {
+    //randomly move rabbits left and right
+    if (Math.random() > 0.2) {
+        rabbits[i].x -= rabbits[i].speed;
+    } else {
+        rabbits[i].x += rabbits[i].speed;
+    }
+
+  if (rabbits[i].x < -50) {
+    rabbits[i].x = canvas.width + 50 + Math.random() * 200;
+    rabbits[i].y = Math.random() * canvas.height;
+    rabbits[i].speed = 0.5 + Math.random() * 3;
+    rabbits[i].frameCount = Math.floor(Math.random() * 60);
+  }
+
+  rabbits[i].frameCount--;
+  if (rabbits[i].frameCount <= 0) {
+    rabbits[i].y += (Math.random() - 0.5) * 20;
+    rabbits[i].frameCount = Math.floor(Math.random() * 60);
+  }}
+}
+
+  // Request next frame
+  window.requestAnimationFrame(gameLoop);
+}
+
+// Start game loop
+gameLoop();
+
+// Keyboard event listener
+document.addEventListener("keydown", function(event) {
+  if (event.code === "ArrowLeft") {
+    x -= speed;
+  } else if (event.code === "ArrowRight") {
+    x += speed;
+  } else if (event.code === "ArrowUp") {
+    y -= speed;
+  } else if (event.code === "ArrowDown") {
+    y += speed;
+  }
+});
+
+// Resize event listener
+window.addEventListener("resize", function() {
+  // Set canvas size to window size
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// Victory function
+function showVictoryScreen() {
+document.getElementById("background-music").pause();
+document.getElementById("victory-screen").style.display = "block";
+document.getElementById("finish-sound").volume = 0.1;
+document.getElementById("finish-sound").play();
+}
+
+</script>
+</html>
