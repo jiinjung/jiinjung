@@ -14,6 +14,7 @@
   "dependencies": {
     "eigen": "^0.2.1",
     "gsap": "^3.11.4",
+    "handtrackjs": "^0.1.5",
     "heatmap.js": "^2.0.5",
     "html2canvas": "^1.4.1",
     "lil-gui": "^0.17.0",

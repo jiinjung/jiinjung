@@ -10,12 +10,15 @@
 </head>
 <body>
     <canvas class="webgl"></canvas>
-    
+
     <!-- welcome slide -->
     <div class="loading_page">
         <h1 class="welcome_text">
             <span class="typed"></span>
         </h1>
+        <!-- make a button at the bottom right corner -->
+        <div class="skip_button">  Skip  </div>
+
     </div>
 
     <!-- Introduction -->
@@ -73,18 +76,17 @@
     <div class="research">
         <div class="box_shadow">
             <div research = "research1_div" class="research_div"> 
-                <a href="research/r1.html">
+                <a href="research/r1.html" class="research_link"></a>
                 <img id = 'research1-img' class="research_img" src = './images/lunardynamo.jpg'> 
                 <p class="research_p"> Lunar Dynamo Evolution</p>
-                </a>
             </div>
         </div>
         <div class="box_shadow">
             <div research = "research2_div" class="research_div"> 
-                <a href="playground/playground.html">
+                <a href="playground/playground.html" class="research_link"> </a>
                 <video id = 'research2-video' class="research_vid" type="video/mp4" src = './videos/FeNi.mp4' autoplay = true loop = true muted = true > </video> 
                 <p class="research_p"> Magnetic Mineralogy of Apollo Samples</p>
-                </a>
+               
             </div>
         </div>
         <div class="box_shadow">
@@ -103,6 +105,8 @@
 
     </div>
 
+
+
     <!-- Portforlio -->
     <div class="section_title">
         <h1 class="section_title_h"> Portfolio </h1>
@@ -113,7 +117,7 @@
         <div class="portfolio_slide" id = "portfolio1">
             <!-- add video -->
             <video id = 'portfolio1-video' class="portfolio-vid" type="video/mp4" autoplay = true loop = true muted = true src = './videos/zjiderveld.mp4'> </video>
-            <div class="portfolio-golive"> <a href="https://scholar.google.com/citations?user=_tdEvv4AAAAJ&hl=en"> <b> Go Live </b> </a> </div>
+            <div class="portfolio-golive"> <a href="playground/apps/zjiderveldPlot.html"> <b> Go Live </b> </a> </div>
             <div class="portfolio-code">  <a href="https://scholar.google.com/citations?user=_tdEvv4AAAAJ&hl=en"> <b> Code </b> </a> </div>   
         </div>
         <div class="portfolio_slide"  id = "portfolio2">
@@ -128,8 +132,7 @@
         </div>
         <div class="portfolio_slide" id = "portfolio4">
             <img id = 'portfolio4-img' class="portfolio-img" src='./images/rabbitgo.png' style = 'height: 560px'> </img>
-            <div class="portfolio-golive"> <a href="https://scholar.google.com/citations?user=_tdEvv4AAAAJ&hl=en"> <b> Go Live </b> </a> </div>
-            <div class="portfolio-code">  <a href="https://scholar.google.com/citations?user=_tdEvv4AAAAJ&hl=en"> <b> Code </b> </a> </div>   
+            <div class="portfolio-golive"> <a href="https://scholar.google.com/citations?user=_tdEvv4AAAAJ&hl=en"> <b> will be released soon</b> </a> </div>  
         </div>
 
 
@@ -137,7 +140,8 @@
             <a href="playground/playground.html" class="link">
           
             </a>
-            🕹️
+            ...
+            <!-- 🕹️ -->
         </div>
         
     </div>

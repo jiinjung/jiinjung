@@ -5,6 +5,32 @@
     box-sizing: border-box;
 }
 
+.menubar{
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    width: 50px;
+    height: 50px;
+    z-index: 99;
+    background-color: rgb(197, 223, 223);
+    border-radius: 50%;
+    overflow: hidden;
+    align-items: center;
+    border : 1px solid rgb(169, 169, 169);
+    opacity: 0.9;
+}
+
+.menubar_text{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    transition: 0.5s;
+    padding: 10px;
+    font-size: 20px;
+    color: rgb(52, 53, 58);
+}
+
 .sidenav {
     display: flex;
     flex-direction: column;
@@ -89,33 +115,25 @@
 
 
 @media screen and (max-width:420px) {
+
     .sidenav {
-        width: 100vw;
-        min-width: 100vw;
-        height:40vh;
+        width: 90vw;
+        min-width: 90vw;
+        height:100vh;
         position: fixed;
         z-index: 1;
         background-color: #efefef;
         overflow:scroll;
-    }
-    .thumbnail_div{
-        width: 90vw;
-        height: 400px;
-    }
-    .thumbnail_img{
-        width: 100vw;
-        height: 100px;
-        
+        opacity: 0.9;
     }
 
     .appContainer {
         margin-left: 0vw;
-        margin-top: 40vw;
         position: fixed;
         height:100vh;
         width: 100vw;
         object-fit: cover;
-        background-color: #d1d1db;
+        background-color: rgb(229, 233, 235);
     }
     
 }

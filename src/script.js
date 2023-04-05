@@ -16,14 +16,18 @@ var typed = new Typed('.typed', {
     backSpeed: 20,
 });
 
-function myGreeting() {
+function finishGreeting() {
     document.body.style.visibility = 'visible';
     // add class name to loading page
     loadingPage.style.opacity = '0';
     loadingPage.style.visibility = 'hidden';
 }
 
-setTimeout(myGreeting, 6500);
+//find the skip button
+const skipButton = document.querySelector('.skip_button');
+skipButton.addEventListener('click', finishGreeting);
+
+setTimeout(finishGreeting, 6500);
 
 /**
  * Sizes

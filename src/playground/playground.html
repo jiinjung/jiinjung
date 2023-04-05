@@ -10,6 +10,10 @@
     <title> Play Ground </title>
 </head>
 <body>
+    <div id="menubar" class="menubar" onclick="hideSideNav()">
+        <h1 class ="menubar_text"> ◀️  </h1>
+    </div>
+
     <div class="sidenav">
 
         <div class="thumbnail_div" onclick="changeContent_src('https://01-render-moon.vercel.app')">
@@ -47,7 +51,7 @@
         </div>
         </div>
 
-        <div class="thumbnail_div" onclick="changeContent_src('https://vercel.com/jiinjung/lydia')" >
+        <div class="thumbnail_div" onclick="changeContent_src('apps/labsetting.html')" >
         <img src="thumbnail/sampleprep.png" class="thumbnail_img">
         <div class ="thumbnail_text">
             <h1> #samplepreparation #laboratory #extraterrestrialmaterials </h1>
@@ -131,6 +135,29 @@
         // find the iframe and change the src
         var iframe = document.querySelector('iframe');
         iframe.src = url;
+    }
+
+    function hideSideNav(){
+        var menubar = document.querySelector('.menubar_text');
+        var sidenav = document.querySelector('.sidenav');
+        if (menubar.innerHTML == "▶️"){
+            sidenav.style.display = "block";
+            menubar.innerHTML = "◀️";
+        }else{
+            sidenav.style.display = "none";
+            menubar.innerHTML = "▶️";
+        }
+    }
+
+    //menubar only appear when the screen is small
+
+    const menubar = document.getElementById("menubar");
+    if (window.innerWidth > 400){
+        // show menubar
+        menubar.style.display = "none";
+    } else {
+        // hide menubar
+        menubar.style.display = "block";
     }
 
 
