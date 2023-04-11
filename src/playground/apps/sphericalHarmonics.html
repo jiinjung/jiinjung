@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Spherical Harmonics </title>
+    <style>
+        *
+    {
+        margin: 0;
+        padding: 0;
+    }
+
+    html,
+    body
+    {
+        overflow: hidden;
+    }
+
+    .webgl
+    {
+        position: fixed;
+        top: 0;
+        left: 0;
+        outline: none;
+        cursor: default;
+    }
+
+    </style>
+</head>
+<body>
+
+    <canvas class="webgl"></canvas>
+    <script type="module">
+    import './style.css'
+    import * as THREE from 'three'
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+    import * as dat from 'lil-gui'
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+
+        
+    function lonlat2cart(R, lat, lon)
+    {
+        let plat = lat * Math.PI / 180
+        let plon = lon * Math.PI / 180
+        let px = - R * Math.cos(plat) * Math.cos(plon)
+        let py = R * Math.cos(plat) * Math.sin(plon)
+        let pz = R * Math.sin(plat) 
+
+        let ans = new THREE.Vector3(px, pz, py)
+        return ans
+    }
+
+    function lookatpoint(lat, G1, G2, G3){
+        let colat = (90 - lat) * Math.PI / 180
+        let r_hat = G1 * (2 * Math.cos(colat)) + G2 * (4.5 * Math.cos(colat)^2 - 1.5) + G3 * (10 * Math.cos(colat)^3 - 6 * Math.cos(colat))
+        let theta_hat = G1 * (Math.sin(colat)) + G2 * (3 * Math.cos(colat) * Math.sin(colat)) + G3 * (7.5 * Math.cos(colat)^2 * Math.sin(colat) - 1.5 * Math.sin(colat))
+        return [r_hat, theta_hat, Math.atan(r_hat/theta_hat)]
+    }
+
+
+    /**
+     * Base
+     */
+    // Debug
+    const gui = new GUI()
+    const debugObject = {}
+    
+
+    // Canvas
+    const canvas = document.querySelector('canvas.webgl')
+
+    // Scene
+    const scene = new THREE.Scene()
+
+    /** 
+     * camera
+     */
+        let camera;
+    camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 200 );
+    camera.position.set( - 1.5, 2.5, 3.0 );
+
+
+    /**
+     * Sizes
+     */
+        const sizes = {
+        width: window.innerWidth,
+        height: window.innerHeight
+    }
+
+    window.addEventListener('resize', () =>
+    {
+        // Update sizes
+        sizes.width = window.innerWidth
+        sizes.height = window.innerHeight
+
+        // Update camera
+        camera.aspect = sizes.width / sizes.height
+        camera.updateProjectionMatrix()
+
+        // Update renderer
+        renderer.setSize(sizes.width, sizes.height)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    })
+
+
+    /** 
+     * renderer
+     */
+    const renderer = new THREE.WebGLRenderer( {
+        canvas: canvas,
+        antialias: true } );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
+    renderer.render( scene, camera )
+
+    function render() {
+
+    renderer.render( scene, camera );
+
+    }
+
+    const sphereGeometry = new THREE.SphereGeometry(1, 48, 24)
+    const sphereMaterial = new THREE.MeshLambertMaterial( { 
+        color: new THREE.Color().setHSL( Math.random(), 0.5, 0.5 ),
+        side: THREE.DoubleSide,
+        wireframe: true
+        } );
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
+    scene.add(sphere)
+    sphere.position.set(0, 0, 0)
+
+
+    const parameters = {}
+    parameters.lat = 10
+    parameters.lon = 10
+    parameters.G1 = 1
+    parameters.G2 = 0
+    parameters.G3 = 0
+    parameters.inColor = '#F53D7D'
+    parameters.outColor = '#2963f5'
+
+
+    let coneGeometry = null
+    let coneMaterial = null
+    let coneGroup = null
+
+    const generatedirections = () =>
+    {
+        // Destroy old galaxy
+        if(coneGroup !== null)
+        {
+            coneGeometry.dispose()
+            coneMaterial.dispose()
+            scene.remove(coneGroup)
+        }
+
+        coneGroup = new THREE.Group()
+
+        const colorIn = new THREE.Color(parameters.inColor)
+        const colorOut = new THREE.Color(parameters.outColor)
+
+        for (let i = - 80; i < 90 ; i+= parameters.lat)
+        {
+            for (let j = -180; j < 180; j+= parameters.lon)
+            {
+
+                coneGeometry = new THREE.ConeGeometry(0.015, 0.2, 10)
+                coneMaterial = new THREE.MeshLambertMaterial()
+                let cone = new THREE.Mesh(coneGeometry, coneMaterial)
+                cone.position.copy(lonlat2cart(1, i, j))
+                cone.lookAt(0, -lookatpoint(i, parameters.G1, parameters.G2, parameters.G3)[2], 0)
+                coneGroup.add(cone)
+
+                // Color
+                const mixedColor = colorIn.clone()
+                mixedColor.lerp(colorOut, -lookatpoint(i, parameters.G1, parameters.G2, parameters.G3)[2])
+                cone.material.color = mixedColor
+                
+            }
+        }
+        scene.add(coneGroup)
+    }
+
+    gui.add(parameters, 'lat').min(1).max(20).step(1).onFinishChange(generatedirections)
+    gui.add(parameters, 'lon').min(1).max(20).step(1).onFinishChange(generatedirections)
+    gui.add(parameters, 'G1').min(-1).max(1).step(0.1).onFinishChange(generatedirections)
+    gui.add(parameters, 'G2').min(-1).max(1).step(0.1).onFinishChange(generatedirections)
+    gui.add(parameters, 'G3').min(-1).max(1).step(0.1).onFinishChange(generatedirections)
+    gui.addColor(parameters, 'inColor').onFinishChange(generatedirections)
+    gui.addColor(parameters, 'outColor').onFinishChange(generatedirections  )
+
+    generatedirections()
+
+
+    // Lights
+    const pointLight = new THREE.PointLight(0xffffff, 1)
+    pointLight.position.x = 2
+    pointLight.position.y = 3
+    pointLight.position.z = 4
+    scene.add(pointLight)
+
+
+    /** 
+     * controls
+     */
+        const controls = new OrbitControls( camera, canvas );
+    controls.minDistance = 1;
+    controls.maxDistance = 10;
+    controls.enablePan = false;
+
+    /** 
+     * light
+     */
+    const light = new THREE.HemisphereLight( 0xffffff, 0x080808, 1.5 );
+    light.position.set( - 1.25, 1, 1.25 );
+    scene.add( light );
+
+
+    /**
+     * Animate
+     */
+        const clock = new THREE.Clock()
+    let previousTime = 0
+
+    const tick = () =>
+    {
+        const elapsedTime = clock.getElapsedTime()
+        const deltaTime = elapsedTime - previousTime
+        previousTime = elapsedTime
+
+        // change G1, G2, G3 value
+        parameters.G1 = elapsedTime 
+        // parameters.G2 = Math.cos(elapsedTime * 0.5)
+        // parameters.G3 = Math.sin(elapsedTime * 0.5)
+
+
+        // Update controls
+        controls.update()
+
+        // Render
+        renderer.render(scene, camera)
+
+        // Call tick again on the next frame
+        window.requestAnimationFrame(tick)
+
+        // generatedirections()
+    }
+
+    tick()
+    
+
+    </script>
+
+</body>
+</html>
