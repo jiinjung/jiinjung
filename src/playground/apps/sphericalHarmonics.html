@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Spherical Harmonics </title>
+
     <style>
         *
     {
@@ -27,9 +28,53 @@
         cursor: default;
     }
 
+
+    @font-face {
+            font-family: nasalization;
+            src: url(../static/fonts/nasalization/nasalization-rg.otf);
+    }
+
+    #credits {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        font-family: nasalization;
+        color: #fff;
+        z-index: 99;
+    }
+
+    .link {
+        color: rgb(225, 148, 255);
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 20px;
+        font-family: nasalization;
+
+    }
+
+    .link:hover {
+        color: rgb(115, 213, 255);
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 20px;
+        font-family: nasalization;
+        cursor: pointer;
+    }
+
+
     </style>
 </head>
 <body>
+
+    <div id="credits"> Magnetic Field Inclination for Dipole, Quadrupole, and Octupole 
+        <a class='link' href="https://www.nature.com/articles/s41550-021-01469-y" target="_blank"> calculations </a>.
+        
+           Inspired by
+        <a class='link' href="https://www.nature.com/articles/s41550-021-01469-y" target="_blank"> [Nichols et al., 2021] </a>
+    </div>
+
 
     <canvas class="webgl"></canvas>
     <script type="module">
@@ -53,20 +98,44 @@
         return ans
     }
 
-    function lookatpoint(lat, G1, G2, G3){
+    function sphInclination(lat, G1, G2, G3){
+
         let colat = (90 - lat) * Math.PI / 180
-        let r_hat = G1 * (2 * Math.cos(colat)) + G2 * (4.5 * Math.cos(colat)^2 - 1.5) + G3 * (10 * Math.cos(colat)^3 - 6 * Math.cos(colat))
-        let theta_hat = G1 * (Math.sin(colat)) + G2 * (3 * Math.cos(colat) * Math.sin(colat)) + G3 * (7.5 * Math.cos(colat)^2 * Math.sin(colat) - 1.5 * Math.sin(colat))
-        return [r_hat, theta_hat, Math.atan(r_hat/theta_hat)]
+        let r_hat = G1 * (2 * Math.cos(colat)) + G2 * (4.5 * Math.cos(colat)**2 - 1.5) + G3 * (10 * Math.cos(colat)**3 - 6 * Math.cos(colat))
+        let theta_hat = G1 * (Math.sin(colat)) + G2 * (3 * Math.cos(colat) * Math.sin(colat)) + G3 * (7.5 * Math.cos(colat)**2 * Math.sin(colat) - 1.5 * Math.sin(colat))
+        // if theta_hat = 0 add a small number to avoid division by zero
+        if (theta_hat == 0){
+            theta_hat = 0.0001
+        }
+
+    return Math.atan(r_hat/theta_hat)
+
     }
 
+
+
+    function sph2cart(R, theta, phi)
+    {
+        let ptheta = theta * Math.PI / 180
+        let pphi = phi * Math.PI / 180
+        let px = R * Math.sin(ptheta) * Math.cos(pphi)
+        let py = R * Math.sin(ptheta) * Math.sin(pphi)
+        let pz = R * Math.cos(ptheta) 
+
+        let ans = new THREE.Vector3(px, pz, py)
+        return ans
+    }
 
     /**
      * Base
      */
     // Debug
     const gui = new GUI()
+    gui.domElement.style.width = '400px'
     const debugObject = {}
+    // make text of gui font
+    gui.domElement.style.fontFamily = 'nasalization'
+    gui.domElement.style.fontSize = '14px'
     
 
     // Canvas
@@ -126,7 +195,7 @@
 
     const sphereGeometry = new THREE.SphereGeometry(1, 48, 24)
     const sphereMaterial = new THREE.MeshLambertMaterial( { 
-        color: new THREE.Color().setHSL( Math.random(), 0.5, 0.5 ),
+        color: new THREE.Color().setHSL( 0.5, 0.5, 0.5 ),
         side: THREE.DoubleSide,
         wireframe: true
         } );
@@ -138,6 +207,7 @@
     const parameters = {}
     parameters.lat = 10
     parameters.lon = 10
+    parameters.scale = 0.5
     parameters.G1 = 1
     parameters.G2 = 0
     parameters.G3 = 0
@@ -164,21 +234,28 @@
         const colorIn = new THREE.Color(parameters.inColor)
         const colorOut = new THREE.Color(parameters.outColor)
 
-        for (let i = - 80; i < 90 ; i+= parameters.lat)
+        for (let i = - 90; i < 90 ; i+= parameters.lat)
         {
             for (let j = -180; j < 180; j+= parameters.lon)
             {
 
                 coneGeometry = new THREE.ConeGeometry(0.015, 0.2, 10)
-                coneMaterial = new THREE.MeshLambertMaterial()
+                coneMaterial = new THREE.MeshLambertMaterial(  );
+
                 let cone = new THREE.Mesh(coneGeometry, coneMaterial)
-                cone.position.copy(lonlat2cart(1, i, j))
-                cone.lookAt(0, -lookatpoint(i, parameters.G1, parameters.G2, parameters.G3)[2], 0)
+                let curLoc = lonlat2cart(1, i, j)
+                cone.position.copy(curLoc)
+
+                cone.scale.multiplyScalar(parameters.scale)
+                cone.position.copy(curLoc)
+
+                cone.lookAt(0, 0, 0)
+                cone.rotateX(sphInclination(i, parameters.G1, parameters.G2, parameters.G3))
                 coneGroup.add(cone)
 
                 // Color
-                const mixedColor = colorIn.clone()
-                mixedColor.lerp(colorOut, -lookatpoint(i, parameters.G1, parameters.G2, parameters.G3)[2])
+                const mixedColor = colorOut.clone()
+                mixedColor.lerp(colorIn, sphInclination(i, parameters.G1, parameters.G2, parameters.G3))
                 cone.material.color = mixedColor
                 
             }
@@ -186,13 +263,14 @@
         scene.add(coneGroup)
     }
 
-    gui.add(parameters, 'lat').min(1).max(20).step(1).onFinishChange(generatedirections)
-    gui.add(parameters, 'lon').min(1).max(20).step(1).onFinishChange(generatedirections)
-    gui.add(parameters, 'G1').min(-1).max(1).step(0.1).onFinishChange(generatedirections)
-    gui.add(parameters, 'G2').min(-1).max(1).step(0.1).onFinishChange(generatedirections)
-    gui.add(parameters, 'G3').min(-1).max(1).step(0.1).onFinishChange(generatedirections)
+    gui.add(parameters, 'lat').min(5).max(20).step(1).onFinishChange(generatedirections).name('Lat Resolution (Deg)')
+    gui.add(parameters, 'lon').min(5).max(20).step(1).onFinishChange(generatedirections).name('Long Resolution (Deg)')
+    gui.add(parameters, 'scale').min(0.1).max(1).step(0.01).onFinishChange(generatedirections).name('Scale')
+    gui.add(parameters, 'G1').min(0).max(1).step(0.01).onFinishChange(generatedirections).name('G1 (Dipole)')
+    gui.add(parameters, 'G2').min(0).max(1).step(0.01).onFinishChange(generatedirections).name('G2 (Quadrupole)')
+    gui.add(parameters, 'G3').min(0).max(1).step(0.01).onFinishChange(generatedirections).name('G3 (Octupole)')
     gui.addColor(parameters, 'inColor').onFinishChange(generatedirections)
-    gui.addColor(parameters, 'outColor').onFinishChange(generatedirections  )
+    gui.addColor(parameters, 'outColor').onFinishChange(generatedirections)
 
     generatedirections()
 
@@ -205,11 +283,16 @@
     scene.add(pointLight)
 
 
+    //add x, y, z helper
+    const axesHelper = new THREE.AxesHelper( 10 );
+    scene.add( axesHelper );
+
+
     /** 
      * controls
      */
         const controls = new OrbitControls( camera, canvas );
-    controls.minDistance = 1;
+    controls.minDistance = 3;
     controls.maxDistance = 10;
     controls.enablePan = false;
 
@@ -233,12 +316,6 @@
         const deltaTime = elapsedTime - previousTime
         previousTime = elapsedTime
 
-        // change G1, G2, G3 value
-        parameters.G1 = elapsedTime 
-        // parameters.G2 = Math.cos(elapsedTime * 0.5)
-        // parameters.G3 = Math.sin(elapsedTime * 0.5)
-
-
         // Update controls
         controls.update()
 
@@ -248,7 +325,11 @@
         // Call tick again on the next frame
         window.requestAnimationFrame(tick)
 
-        // generatedirections()
+        // rotate camera
+        camera.position.x = Math.cos(elapsedTime * 0.1 ) * 3 
+        camera.position.z = Math.sin(elapsedTime * 0.1 ) * 3
+        camera.lookAt(0, 0, 0)
+        
     }
 
     tick()
