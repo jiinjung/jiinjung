@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lab preparation</title>
+
+    <style>
+
+    .p20 {
+        padding: 20px;
+    }
+
+.canvasbox {
+    border-radius: 3px;
+    margin-right: 10px;
+    width: 450px;
+    height: 338px;
+    border-bottom: 3px solid #0063FF;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.2), 0 4px 10px 0 #00000030;
+  background: #333;
+
+}
+
+.mb10 {
+    margin-bottom: 10px
+}
+
+.mt10 {
+    margin-top: 10px
+}
+
+.updatenote {
+    padding: 10px;
+    background: rgb(245, 147, 20);
+    color: white;
+    display: inline;
+}
+
+.movingbox {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+}
+    </style>
+</head>
+<body class="bx--body p20">
+
+    <div class="mb10">
+
+      <button id="trackbutton" class="bx--btn bx--btn--secondary" type="button">
+        Start!
+      </button>
+      <div id="updatenote" class="updatenote mt10"> loading model ..</div>
+    </div>
+    <video class="videobox canvasbox" autoplay="autoplay" id="myvideo"></video>
+    <canvas id="canvas" class="border canvasbox"></canvas>
+    <div id="movingbox" style="width:100px; height:100px; background-color: aqua;"> box </div>
+
+    
+<script type="module">
+        import * as handTrack from 'handtrackjs';
+
+        const video = document.getElementById("myvideo");
+        const canvas = document.getElementById("canvas");
+        const context = canvas.getContext("2d");
+        let trackButton = document.getElementById("trackbutton");
+        let updateNote = document.getElementById("updatenote");
+        //make videobox invisible
+        video.style.display = "none";
+
+        let isVideo = false;
+        let model = null;
+
+        const modelParams = {
+            flipHorizontal: true,   // flip e.g for video  
+            maxNumBoxes: 20,        // maximum number of boxes to detect
+            iouThreshold: 0.5,      // ioU threshold for non-max suppression
+            scoreThreshold: 0.6,    // confidence threshold for predictions.
+        }
+
+        function startVideo() {
+            handTrack.startVideo(video).then(function (status) {
+                console.log("video started", status);
+                if (status) {
+                    updateNote.innerText = "Video started. Now tracking"
+                    isVideo = true
+                    runDetection()
+                } else {
+                    updateNote.innerText = "Please enable video"
+                }
+            });
+        }
+
+        function toggleVideo() {
+            if (!isVideo) {
+                updateNote.innerText = "Starting video"
+                startVideo();
+            } else {
+                updateNote.innerText = "Stopping video"
+                handTrack.stopVideo(video)
+                isVideo = false;
+                updateNote.innerText = "Video stopped"
+            }
+        }
+
+        //find tracbutton and add event listener
+        trackButton.addEventListener("click", function () {
+            toggleVideo();
+        });
+
+        function runDetection() {
+            model.detect(video).then(predictions => {
+                
+                model.renderPredictions(predictions, canvas, context, video);
+                
+                if (isVideo) {
+                    requestAnimationFrame(runDetection);
+                }
+
+                if (predictions.length > 0) {
+                    // looping prediction and if that is not a face then
+                    if (predictions[0].label != "face") {
+                        //stop the video
+
+                    
+
+                    //find the label 
+                    console.log(predictions);
+                    let hand1 = predictions[0].bbox;
+                    let x = hand1[0];
+                    let y = hand1[1];
+                    let w = hand1[2];
+                    let h = hand1[3];
+                    let movingbox = document.getElementById("movingbox");
+                    movingbox.style.position = "absolute";
+                    movingbox.style.left = x * 2 + 100 + "px";
+                    movingbox.style.top = y * 2 + 100 + "px";
+                    movingbox.style.width = w + "px";
+                    movingbox.style.height = h + "px";
+
+
+                }
+                }
+
+            });
+        }
+
+        // Load the model.
+        handTrack.load(modelParams).then(lmodel => {
+            // detect objects in the image.
+            model = lmodel
+            updateNote.innerText = "Loaded Model!"
+            trackButton.disabled = false
+        });
+
+
+
+    </script>
+</body>
+</html>
