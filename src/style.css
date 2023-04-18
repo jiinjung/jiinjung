@@ -109,7 +109,7 @@ html
 }
 
 .prof_img{
-    width: 200px;
+    width: 250px;
     border-radius: 20px;
     opacity: 0.91;
     z-index: 1;
@@ -721,6 +721,7 @@ section:nth-child(odd)
     .header_tag { 
         flex-basis: 100%; 
         margin-top: 10px;
+        padding: 0%;
         align-content: flex-start;
     }
 
@@ -780,13 +781,14 @@ section:nth-child(odd)
     .header_txt { 
         padding-top: 5%;
         margin: 0%;
-        min-width: none;
+        min-width: 0px;
         align-content: center;
     }
 
     .header_tag { 
         flex-basis: 100%; 
         margin-top: 10px;
+        padding: 0%;
         align-content: flex-start;
     }
 
@@ -997,6 +999,7 @@ section:nth-child(odd)
 
     .header_txt { 
         width: 100%;
+        min-width: 0px;
         flex-basis: 100%; 
         margin: 0%;
         padding: 5%;
@@ -1020,7 +1023,7 @@ section:nth-child(odd)
         flex-wrap: wrap;
         flex-basis: 100%; 
         margin-top: 10px;
-
+        padding: 0%;
         text-align: center;
         align-content: center;
         }
