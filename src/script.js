@@ -5,6 +5,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import enfj from '../static/images/enfj_white.png'
 import Typed from 'typed.js'
 
+
 /** 
  * loading page 
  */
@@ -63,6 +64,7 @@ window.addEventListener('mousemove', (event) =>
     mouse.x = event.clientX / sizes.width * 2 - 1
     mouse.y = - (event.clientY / sizes.height) * 2 + 1
 })
+
 
 // get the absolute position of an element id in the page
 function getAbsolutePosition(el) {
