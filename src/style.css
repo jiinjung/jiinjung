@@ -74,15 +74,11 @@ html
     justify-content: space-between;
     align-items: center;
     margin-top: 8%;
-    /* margin-left: 25%; */
-    /* min-width: max(100px, 50%); */
     width: 50%;
     z-index: 1;
 }
 
 .header_txt{
-    /* set minimum width of 300px */
-    /* min-width: max(500px, 100%); */
     min-width: 500px;
     float: left;
     display: flex;
@@ -163,7 +159,6 @@ html
     width: -webkit-fill-available;
     z-index: 1;
     padding-top: 2%;
-    /* padding-left: 10%; */
     align-content: flex-end;
 }
 
@@ -183,7 +178,6 @@ html
     text-transform: uppercase;
     justify-content: baseline;
     text-align: center;
-    /* margin-top: 10%; */
     padding-top: 7%;
     padding-bottom: 5%;
     font-size: 30px;
@@ -206,12 +200,9 @@ html
     grid-template-rows: repeat(2, 1fr);
     grid-column-gap: 30px;
     grid-row-gap: 30px;
-    /* margin-top: 5%; */
     text-align: center;
     justify-content: space-between;
     align-items: center;
-    /* width: 850px;
-    height: 730px; */
     z-index: 1;
 }
 
@@ -318,7 +309,6 @@ html
 .portfolio{
     display: flex;
     overflow: -moz-hidden-unscrollable;
-    /* margin-top: 5%; */
     float:center;
     text-align: center;
     justify-content: center;
