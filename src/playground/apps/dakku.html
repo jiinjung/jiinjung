@@ -19,21 +19,21 @@
         #container
         {
             display: flex;
-            margin-left: 5%; 
-            margin-right: 5%;
+            margin-left: 10px; 
+            margin-right: 10px;
             width: 100vw;
             height: 100vh;
             flex-direction: row;
             align-items: center;
             background-color: transparent;
-            gap: 5%;
+            gap: 20px;
         }
 
         #linev
         {
             position: absolute;
-            width: 50vw;
-            height: 90vh;
+            width: 100vw;
+            height: 100vh;
             background-color: transparent;
             background-image: linear-gradient(90deg, transparent 95%, rgba(182, 180, 180, 0.284) 5%);
             background-size: 10px 10px;
@@ -43,30 +43,12 @@
         #linew
         {
             position: absolute;
-            width: 50vw;
-            height: 90vh;
+            width: 100vw;
+            height: 100vh;
             background-color: transparent;
             background-image: linear-gradient(180deg, transparent 95%, rgba(182, 180, 180, 0.284) 5%);
             background-size: 10px 10px;
             background-repeat: repeat;
-        }
-
-        #paper
-        {
-            display: flex;
-            width: 50vw;
-            height: 90vh;
-            background-color: rgb(253, 239, 236);
-            border-radius: 5px;
-        }
-
-        #sticker
-        {
-            width: 400px;
-            height: 90vh;
-            background-color: transparent;
-            border-radius: 5px;
-            border-style: solid;
         }
 
         #write
@@ -104,7 +86,6 @@
             opacity: 0.5;
         }
 
-
         #cursor
         {
             position: absolute;
@@ -115,7 +96,6 @@
             opacity: 1;
         }
 
-
         #quote {
         padding: 10px;
         cursor: move;
@@ -124,41 +104,34 @@
         color: rgb(108, 107, 109);
         }
 
- 
-
-        
-
     </style>
 
 
 </head>
 <body>
-    <!-- make a div -->
+
     <div id="container">
         <canvas id="canvas"></canvas>
-        <!-- make a div -->
-        <div id="paper"> 
-            <div id="linev"></div>
-            <div id="linew"></div>
-            <p id="date" style="font-size: large; font-family: monospace; margin-left: 30px;"></p>
-            <div class="draggable" id="write" style="width: 100px; top: 35vh; right: 5vw;">
-                <img src = "../static/images/write.png" style="width: 100px;">
-                <div id="btn"> write </div>
-                </div>
-        
-        </div>
 
-        <div id="sticker">
-        <img class="draggable" id="logo" src="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" style="width: 150px; border-radius: 50%; top: 0; right: 5vw;">
-        <img class="draggable" id="logo1" src="../static/images/star.png" style="width: 100px; border-radius: 50%; top: 10vh; right: 15vw;">
-        <img class="draggable" id="logo2" src="../static/images/rabbitgo.png" style="width: 150px; border-radius: 10%; top: 15vh; right: 25vw;">
-        <img class="draggable" id="logo3" src="../static/images/title.png" style="width: 200px; border-radius: 5%; top: 5vh; right: 20vw;">
-        <img class="draggable" id="lunardynamo" src="../static/images/lunardynamo.svg" style="width: 200px; border-radius: 50%; top: 20vh; right: 5vw;">
-        <img class="draggable" id="lunardynamo-sticker" src="../static/images/lunardynamo_sticker.png" style="width: 200px; top: 35vh; right: 5vw;">
-        <img class="draggable" id="quote-armstrong" src="../static/images/quote-armstrong.svg" style="width: 300px; top: 35vh; right: 5vw;">
-        
-        <div class="draggable" id="quote" style="font-family: Arial, Helvetica, sans-serif;"> APOLLO 11 </div>
-    </div>
+    <!-- <div id="paper">  -->
+        <div id="linev"></div>
+        <div id="linew"></div>
+        <p id="date" style="font-size: large; font-family: monospace; margin-left: 30px;"></p>
+        <div class="draggable" id="write" style="width: 100px; top: 35vh; right: 5vw;">
+            <img src = "../static/images/write.png" style="width: 100px;">
+            <div id="btn"> write </div>
+            </div>
+
+            <img class="draggable" id="logo" src="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" style="width: 150px; border-radius: 50%; top: 0; right: 5vw;">
+            <img class="draggable" id="logo1" src="../static/images/star.png" style="width: 100px; border-radius: 50%; top: 10vh; right: 15vw;">
+            <img class="draggable" id="logo2" src="../static/images/rabbitgo.png" style="width: 150px; border-radius: 10%; top: 15vh; right: 25vw;">
+            <img class="draggable" id="logo3" src="../static/images/title.png" style="width: 200px; border-radius: 5%; top: 5vh; right: 20vw;">
+            <img class="draggable" id="lunardynamo" src="../static/images/lunardynamo.svg" style="width: 200px; border-radius: 50%; top: 20vh; right: 5vw;">
+            <img class="draggable" id="lunardynamo-sticker" src="../static/images/lunardynamo_sticker.png" style="width: 200px; top: 35vh; right: 5vw;">
+            <img class="draggable" id="quote-armstrong" src="../static/images/quote-armstrong.svg" style="width: 300px; top: 35vh; right: 5vw;">
+            <div class="draggable" id="quote" style="font-family: Arial, Helvetica, sans-serif;"> APOLLO 11 </div>
+    
+    <!-- </div> -->
 
     </div>
 
