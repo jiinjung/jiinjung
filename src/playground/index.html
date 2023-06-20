@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="playground.css" type="text/css"/>
+    <link href="../output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <title> Play Ground </title>
+</head>
+<body>
+    <div id="menubar" class="menubar" onclick="hideSideNav()">
+        <h1 class ="menubar_text"> ◀️  </h1>
+    </div>
+
+    <div class="sidenav">
+
+        <div class="thumbnail_div" onclick="changeContent_src('https://01-render-moon.vercel.app')">
+            <img src="thumbnail/moonRender.png" class="thumbnail_img">
+            <div class ="thumbnail_text">
+                <h1> #moon #mare #koreanversion</h1>
+        </div>
+        </div>    
+
+        <div class="thumbnail_div" onclick="changeContent_src('apps/zjiderveldPlot.html')" >
+        <img src="thumbnail/zjiderveld.png" class="thumbnail_img">
+        <div class ="thumbnail_text">
+            <h1> #zjiderveldplot #vectorenddiagram #paleomagnetism </h1>
+        </div>
+        </div>
+  
+        <div class="thumbnail_div" onclick="changeContent_src('https://stanfordpmaglab.vercel.app')">
+        <img src="thumbnail/stanfordpaleomagnetism.png" class="thumbnail_img">
+        <div class ="thumbnail_text">
+            <h1> #paleomagnetismLab #stanford #magneticallyshieldedroom </h1>
+        </div>
+        </div>
+
+        <div class="thumbnail_div" onclick="changeContent_src('https://justforfun-sigma.vercel.app/')" >
+        <img src="thumbnail/displacementmap.png" class="thumbnail_img">
+        <div class ="thumbnail_text">
+            <h1> #displacementmaps #mars #moon #lookatthatOlympusMons</h1>
+        </div>
+        </div>
+
+        <div class="thumbnail_div" onclick="changeContent_src('apps/internalstructure.html')" >
+        <img src="thumbnail/internalStructure.png" class="thumbnail_img">
+        <div class ="thumbnail_text">
+            <h1> #innerplanets #internal structure #core #matle #crust </h1>
+        </div>
+        </div>
+
+        <div class="thumbnail_div" onclick="changeContent_src('apps/sphericalHarmonics.html')" >
+            <img src="thumbnail/sphericalHarmonics.png" class="thumbnail_img">
+            <div class ="thumbnail_text">
+                <h1> #sphericalHarmonics #dipole #quadrupole #octupole  </h1>
+            </div>
+            </div>
+
+        <div class="thumbnail_div" onclick="changeContent_src('apps/apollogame.html')" >
+            <img src="thumbnail/apollogame.png" class="thumbnail_img">
+            <div class ="thumbnail_text">
+                <h1> #Apollo15 #landingsite #AImadegame #collectrocksamples #avoidrabbits  </h1>
+            </div>
+            </div>
+
+
+        <div class="thumbnail_div" onclick="changeContent_src('apps/Microscopy.html')" >
+            <img src="thumbnail/microscopy.png" class="thumbnail_img">
+            <div class ="thumbnail_text">
+                <h1> #samplepreparation #laboratory #extraterrestrialmaterials </h1>
+            </div>
+            </div>
+    
+        <div class="thumbnail_div" onclick="changeContent_html('apps/aresian.html')">
+            <img src="thumbnail/aresian.png" class="thumbnail_img">
+            <div class ="thumbnail_text">
+                <h1> #mars #capybara #galecrator #topography #metaverse </h1>
+            </div>
+            </div>
+
+
+        <div class="thumbnail_div" onclick="changeContent_src('apps/dakku.html')" >
+            <img src="thumbnail/dakku.png" class="thumbnail_img">
+            <div class ="thumbnail_text">
+                <h1> #dakku(다꾸) #journal #scrapbook #crafts #spacetheme </h1>
+            </div>
+            </div>
+    
+
+        <div class="thumbnail_div" onclick="changeContent_src('https://lydia.vercel.app')">
+        <img src="thumbnail/lydia.png" class="thumbnail_img">
+        <div class ="thumbnail_text">
+            <h1> #bust #lydia #3d #art</h1>
+        </div>
+        </div>
+
+        <div class="thumbnail_div" onclick="changeContent_html('apps/eve.html')">
+        <img src="thumbnail/eve.png" class="thumbnail_img">
+        <div class ="thumbnail_text">
+            <h1> #bust #eve #3d #art</h1>
+        </div>
+        </div>
+
+
+        <div class="thumbnail_div" onclick="changeContent_src('apps/labsetting.html')" >
+            <img src="thumbnail/sampleprep.png" class="thumbnail_img">
+            <div class ="thumbnail_text">
+                <h1> #underconstruction #samplepreparation #laboratory </h1>
+            </div>
+            </div>
+    
+ 
+
+        <div class="thumbnail_div" onclick="changeContent_html('apps/rabbitGo.html')">
+        <img src="thumbnail/rabbitgo.png" class="thumbnail_img">
+        <div class ="thumbnail_text">
+            <h1>  #underconstruction #rabbit #sciencegame #speedgame </h1>
+        </div>
+        </div>
+
+
+
+    </div>
+
+    <div class = "appContainer"> <!-- style="margin-left:400px; width: 100%; height: 900px; touch-action: none;"> -->
+    <!-- <div style="margin-left:350px; width: 1400px; height: 900px;touch-action: none;"> -->
+        <iframe  frameborder="0" allowfullscreen  width="100%" height="100%"></iframe>
+    </div>
+</body>
+
+<script type="text/javascript">
+
+    function getCurrentURL () {
+        return window.location.href
+    }
+
+    const url = getCurrentURL()
+
+    function changeContent_html(path){
+        var iframe = document.querySelector('iframe');
+        iframe.src =  url.replace('playground.html', path);
+    }
+
+    function changeContent_src(url){
+        // find the iframe and change the src
+        var iframe = document.querySelector('iframe');
+        iframe.src = url;
+    }
+
+    function hideSideNav(){
+        var menubar = document.querySelector('.menubar_text');
+        var sidenav = document.querySelector('.sidenav');
+        if (menubar.innerHTML == "▶️"){
+            sidenav.style.display = "block";
+            menubar.innerHTML = "◀️";
+        }else{
+            sidenav.style.display = "none";
+            menubar.innerHTML = "▶️";
+        }
+    }
+
+    //menubar only appear when the screen is small
+
+    const menubar = document.getElementById("menubar");
+    if (window.innerWidth > 400){
+        // show menubar
+        menubar.style.display = "none";
+    } else {
+        // hide menubar
+        menubar.style.display = "block";
+    }
+
+
+
+</script>
+</html>
