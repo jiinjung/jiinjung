@@ -122,7 +122,7 @@ html
   /* z-index: 99999; */
   bottom: 130%; 
   left: 50%;
-  margin-left: -170px; /* Use half of the width to center the tooltip */
+  margin-left: 100px; /* Use half of the width to center the tooltip */
   
   /* Fade in tooltip */
   opacity: 0;
@@ -1188,6 +1188,27 @@ section:nth-child(odd)
         padding: 0%;
         align-content: center;
     }
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: #415cf6e6;
+        color: rgb(255, 255, 255);
+        text-align: center;
+        padding: 5px;
+        border-radius: 3px;
+        
+        /* Position the tooltip text */
+        position: absolute;
+        /* z-index: 99999; */
+        bottom: 130%; 
+        left: 50%;
+        margin-left: -100px; /* Use half of the width to center the tooltip */
+        
+        /* Fade in tooltip */
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
 
     .research{
         display: grid;
