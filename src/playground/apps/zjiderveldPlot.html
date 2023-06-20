@@ -178,6 +178,26 @@
         display: flex;
         flex-direction: column-reverse;
     }
+
+    .tutorial{
+        position: relative;
+        top: 0vh;
+        width: 180px;
+        /* height: 50px; */
+        background: #00000077;
+        touch-action: none;
+        opacity: 1;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        font-family: Helvetica, Arial, sans-serif;
+        z-index: 1;
+        padding: 10px;
+        border-radius: 1px;
+        color: #ffffff;
+    }
     </style>
 
 </head>
@@ -188,6 +208,12 @@
 
     <!-- make a div class options that comes to the front-->
     <div class ="options" style="z-index: 999; text-align: center; ">     </div>
+
+    <div class="tutorial">
+        click : point selection
+        <br>
+        enter : calculation
+    </div>
 
     <div class="menubarContainer">
         <div class="menubar ">
@@ -263,7 +289,7 @@ let point = {
  * Debug
  */
 const gui = new dat.GUI({
-    width: 400
+    width: 200
 })
 
 const debug_Selection = gui.addFolder('bound selections')

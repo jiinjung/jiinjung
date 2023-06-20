@@ -19,14 +19,11 @@
         #container
         {
             display: flex;
-            margin-left: 10px; 
-            margin-right: 10px;
             width: 100vw;
             height: 100vh;
             flex-direction: row;
             align-items: center;
             background-color: transparent;
-            gap: 20px;
         }
 
         #linev
@@ -104,6 +101,25 @@
         color: rgb(108, 107, 109);
         }
 
+        #popup{
+            position: absolute;
+            z-index: 99;
+            display: none;
+            width : 400px;
+            height: 120px;
+            border-radius: 10px; 
+            top: 0;
+            align-items: center;
+            justify-content: center;
+            align-items: center; 
+            flex-direction: column;
+        }
+
+        @font-face {
+            font-family: 'Purplesmile';
+            src: url('../static/fonts/purpleSmile/Purple\ Smile.otf') format('truetype');
+        }
+
     </style>
 
 
@@ -113,11 +129,19 @@
     <div id="container">
         <canvas id="canvas"></canvas>
 
-    <!-- <div id="paper">  -->
+        <!-- add pop up saying that  "welcome to dakku"-->
+        <!-- <div id="popup" style="width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); position: absolute; z-index: 10; display: flex; justify-content: center; align-items: center;"> -->
+            <div id="popup" style=" background-color: white; display: flex; ">
+                <p style="font-size: 15px; font-family: Arial, Helvetica, sans-serif;"> 👋 Welcome to Dakku! </p>
+                <p style="font-size: 15px; font-family:  Helvetica;"> Let's write something ✍️ and decorate it!🍩🌸🍒🎁💙☕️</p>
+                <!-- <button id="start" style="font-size: 15px; font-family:  Helvetica;"> Close </button> -->
+            </div>
+        <!-- </div>
+         -->
         <div id="linev"></div>
         <div id="linew"></div>
         <p id="date" style="font-size: large; font-family: monospace; margin-left: 30px;"></p>
-        <div class="draggable" id="write" style="width: 100px; top: 35vh; right: 5vw;">
+        <div class="draggable" id="write" style="width: 100px; top: 10vh; right: 35vw;">
             <img src = "../static/images/write.png" style="width: 100px;">
             <div id="btn"> write </div>
             </div>
@@ -128,8 +152,8 @@
             <img class="draggable" id="logo3" src="../static/images/title.png" style="width: 200px; border-radius: 5%; top: 5vh; right: 20vw;">
             <img class="draggable" id="lunardynamo" src="../static/images/lunardynamo.svg" style="width: 200px; border-radius: 50%; top: 20vh; right: 5vw;">
             <img class="draggable" id="lunardynamo-sticker" src="../static/images/lunardynamo_sticker.png" style="width: 200px; top: 35vh; right: 5vw;">
-            <img class="draggable" id="quote-armstrong" src="../static/images/quote-armstrong.svg" style="width: 300px; top: 35vh; right: 5vw;">
-            <div class="draggable" id="quote" style="font-family: Arial, Helvetica, sans-serif;"> APOLLO 11 </div>
+            <img class="draggable" id="quote-armstrong" src="../static/images/quote-armstrong.svg" style="width: 300px; top: 60vh; right: 5vw;">
+            <!-- <div class="draggable" id="quote" style="font-family: Arial, Helvetica, sans-serif;" style="width: 300px; top: 60vh; right: 5vw;"> APOLLO 11 </div> -->
     
     <!-- </div> -->
 
@@ -140,6 +164,14 @@
     <script type="module">
 
         import html2canvas from 'html2canvas';
+
+        // add a pop up div saying " welcome let's do dakku! write and decorate your journal"
+        // create a div for the journal
+        
+        
+        // add a button to start the journal
+
+
 
         let dragElementId = ["logo", "logo1", "logo2", "logo3", "lunardynamo", "lunardynamo-sticker", "quote-armstrong", "write", "quote"];
 

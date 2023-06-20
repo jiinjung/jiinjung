@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import enfj from '../static/images/enfj_white.png'
 import Typed from 'typed.js'
+import { string } from 'mathjs'
 
 
 /** 
@@ -29,6 +30,37 @@ const skipButton = document.querySelector('.skip_button');
 skipButton.addEventListener('click', finishGreeting);
 
 setTimeout(finishGreeting, 6500);
+
+/**
+ * Research Div Modal
+ */
+var researchDivs = document.getElementsByClassName("research_div");
+var modal 
+
+// Attach click event to each research div
+for (let i = 0; i < researchDivs.length; i++) {
+  researchDivs[i].onclick = function() {
+    modal = document.getElementById("modal" + String(i + 1));
+    modal.style.display = "block";
+  }
+}
+var span1 = document.getElementById("close1");
+var span2 = document.getElementById("close2");
+var span3 = document.getElementById("close3");
+var span4 = document.getElementById("close4");
+
+// When the user clicks on <span> (x), close the modal
+span1.onclick = function() { modal.style.display = "none"}
+span2.onclick = function() { modal.style.display = "none"}
+span3.onclick = function() { modal.style.display = "none"}
+span4.onclick = function() { modal.style.display = "none"}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
 
 /**
  * Sizes
@@ -106,7 +138,7 @@ const ENFJplane = new THREE.Mesh(ENFJplaneGeometry, ENFJplaneMaterial)
 
 ENFJplane.name = 'ENFJ'
 ENFJplane.position.set(0, 20, 0)
-ENFJplane.scale.set(1, 1,1)
+ENFJplane.scale.set(1, 1, 1)
 ENFJplane.rotation.set(0, 0, 0)
 scene.add(ENFJplane)
 
@@ -269,10 +301,10 @@ const tick = () =>
         let translateY =  htmlPosition.y / sizes.height * 4 - 0.5
 
 
-        capybaraGLTF.position.x =  translateX 
+        capybaraGLTF.position.x =  translateX  + 0.5
         capybaraGLTF.position.y =  -translateY 
 
-        ENFJplane.position.x =  translateX - 1
+        ENFJplane.position.x =  translateX - 0.5
         ENFJplane.position.y =  - translateY + 0.07
         ENFJplane.rotation.z =  Math.sin(elapsedTime * 5) * 0.01
 

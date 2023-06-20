@@ -43,6 +43,16 @@
         background-color: rgb(255, 255, 255);
         z-index: 1;
     }
+    #credits {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        font-family: nasalization;
+        color: #fff;
+        z-index: 99;
+    }
 
     .option
     {
@@ -58,7 +68,7 @@
         cursor: pointer;
         text-transform: uppercase;
         font-size: 20px;
-        font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        font-family: nasalization;
     }
 
     .option:hover
@@ -87,6 +97,8 @@
         <div id ="mars"  class="option"> Mars </div>
        </div>
 
+       <div id="credits"> <p style="font-size: small;"> Normalized Internal Structure of the Inner Planets: Core, Mantle, and Crust </a></p>
+        </div>
 </body>
 
 
@@ -118,6 +130,7 @@
             const gui = new dat.GUI({
                 width: 300
             })
+            gui.domElement.style.fontFamily = 'nasalization'
 
 
             // Canvas
@@ -183,26 +196,12 @@
             .name('background color')
 
 
-            gui.add( params, 'clipIntersection' ).name( 'clip intersection' ).onChange( function ( value ) {
-                const children = group.children;
-                for ( let i = 0; i < children.length; i ++ ) {
-                    children[ i ].material.clipIntersection = value;
-                }
-                render();
-            } );
-
             gui.add( params, 'planeConstant', - 1, 1 ).step( 0.01 ).name( 'plane constant' ).onChange( function ( value ) {
             for ( let j = 0; j < clipPlanes.length; j ++ ) {
                 clipPlanes[ j ].constant = value;
             }
             render();
             } );
-
-            gui.add( params, 'showHelpers' ).name( 'show helpers' ).onChange( function ( value ) {
-            helpers.visible = value;
-            render();
-            } );
-
 
             /** 
              * controls
@@ -249,9 +248,9 @@
              */
             const earthGroup = new THREE.Group();
 
-            const earthInternal = [6371, 6371-100, 6371-2885, 6371-5155, 6371-6371]
+            const earthInternal = [6371, 6371-100, 6371-2885, 6371-6371]
             // red, yellow, blue, green, white
-            const earthColor = [0, 0.1, 0.2, 0.3, 0.4]
+            const earthColor = [0.42, 0.23, 0.01, 0]
 
             for ( let i = 0; i < earthInternal.length; i++ ) {
 
@@ -259,7 +258,7 @@
 
                 const material = new THREE.MeshLambertMaterial( {
 
-                    color: new THREE.Color().setHSL( earthColor[i], 0.5, 0.5 ),
+                    color: new THREE.Color().setHSL(earthColor[i], 0.5, 0.5 ),
                     side: THREE.DoubleSide,
                     clippingPlanes: clipPlanes,
                     clipIntersection: params.clipIntersection
@@ -306,9 +305,9 @@
              */
             const moonGroup = new THREE.Group();
 
-            const moonInternal = [1737, 1700, 587, 350, 160, 0]
+            const moonInternal = [1737, 1700, 350, 0]
             // red, yellow, blue, green, white
-            const moonColor = [0, 0.1, 0.2, 0.3, 0.4]
+            const moonColor = [0.42, 0.23, 0.01, 0]
 
             for ( let i = 0; i < moonInternal.length; i++ ) {
 
@@ -338,7 +337,7 @@
 
             const marsInternal = [3390, 3390-50, 1830]
             // red, yellow, blue, green, white
-            const marsColor = [0, 0.1, 0.2, 0.3, 0.4]
+            const marsColor = [0.42, 0.23, 0.01, 0]
 
             for ( let i = 0; i < marsInternal.length; i++ ) {
 
@@ -368,7 +367,7 @@
 
             const mercuryInternal = [2440, 2440-150, 1800]
             // red, yellow, blue, green, white
-            const mercuryColor = [0, 0.1, 0.2, 0.3, 0.4]
+            const mercuryColor = [0.42, 0.23, 0.01, 0]
 
             for ( let i = 0; i < mercuryInternal.length; i++ ) {
 
@@ -401,7 +400,7 @@
 
             // red, yellow, blue, green, white
 
-            const venusColor = [0, 0.1, 0.2, 0.3, 0.4]
+            const venusColor = [0.42, 0.23, 0.01, 0]
 
             for ( let i = 0; i < venusInternal.length; i++ ) {
 
