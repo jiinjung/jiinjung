@@ -1,3 +1,5 @@
+import { defineConfig } from 'vite'
+
 const isCodeSandbox = 'SANDBOX_URL' in process.env || 'CODESANDBOX_HOST' in process.env
 
 export default {
@@ -13,6 +15,12 @@ export default {
     {
         outDir: '../dist',
         emptyOutDir: true,
-        sourcemap: true
+        sourcemap: true,
+        rollupOptions: {
+            input: {
+              main: '/index.html',
+              playground: '/playground/playground.html',
+            }
+        }
     }
 }

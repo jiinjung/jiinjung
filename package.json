@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && npm --prefix ./src/playground run build"
+    "build": "vite build"
   },
   "devDependencies": {
     "tailwindcss": "^3.2.4",
