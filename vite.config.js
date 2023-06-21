@@ -20,6 +20,15 @@ export default {
             input: {
               main: '/index.html',
               playground: '/playground/playground.html',
+              apollogame: '/playground/apps/apollogame.html',
+              aresian: '/playground/apps/aresian.html',
+              dakku: '/playground/apps/dakku.html',
+              eve: '/playground/apps/eve.html',
+              internalstructure: '/playground/apps/internalstructure.html',
+              microscopy: '/playground/apps/microscopy.html',
+              rabbitGo: '/playground/apps/rabbitGo.html',
+              sphericalHarmonics: '/playground/apps/sphericalHarmonics.html',
+              zjiderveldPlot: '/playground/apps/zjiderveldPlot.html',
             }
         }
     }
