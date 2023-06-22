@@ -82,6 +82,10 @@ canvas {
 
 
 <script type="module">
+import astronautpath from "../static/images/astronaut.svg"
+import rockpath from "../static/images/rock.svg"
+import rabbitpath from "../static/images/rabbit.svg"
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -103,17 +107,18 @@ muteButton.addEventListener("click", function() {
 });
 
 
+
 // Load astronaut image
 const astronaut = new Image();
-astronaut.src = "../static/images/astronaut.svg";
+astronaut.src = astronautpath;
 
 // Load star image
 const star = new Image();
-star.src = "../static/images/rock.svg";
+star.src = rockpath;
 
 // Load rabbit image
 const rabbit = new Image();
-rabbit.src = "../static/images/rabbit.svg";
+rabbit.src = rabbitpath;
 
 // Game state
 let x = 50;
