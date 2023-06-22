@@ -17,6 +17,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import eve from '../static/models/Eve-.glb'
+
 
 /**
  * Base
@@ -45,11 +47,11 @@ gltfLoader.setDRACOLoader(dracoLoader)
  * Models
  */
 gltfLoader.load(
-    '/playground/static/models/Eve-.glb',
+    '../static/models/Eve-.glb',
     (gltf) =>
     {
         gltf.scene.scale.set(0.5, 0.5, 0.5)
-        gltf.scene.position.set(0, 0, 0)
+        gltf.scene.position.set(0, -1.5, 0)
         //gltf.scene.rotation.y = Math.PI * 0.5
         scene.add(gltf.scene)
 
@@ -58,32 +60,68 @@ gltfLoader.load(
 )
 
 // add environment map
-const environmentMapTexture = new THREE.CubeTextureLoader()
+// const environmentMapTexture = new THREE.CubeTextureLoader()
 
-    .setPath('/playground/static/textures/environmentMaps/3/')
-    .load([
-        'px.jpg',
-        'nx.jpg',
-        'py.jpg',
-        'ny.jpg',
-        'pz.jpg',
-        'nz.jpg'
-    ])
-scene.background = environmentMapTexture
-scene.environment = environmentMapTexture
+//     .setPath('/playground/static/textures/environmentMaps/3/')
+//     .load([
+//         'px.jpg',
+//         'nx.jpg',
+//         'py.jpg',
+//         'ny.jpg',
+//         'pz.jpg',
+//         'nz.jpg'
+//     ])
+// scene.background = environmentMapTexture
+// scene.environment = environmentMapTexture
 
 
 /**
  * Lights
  */
 // Ambient light
-const ambientLight = new THREE.AmbientLight('#ffffff', 0.5)
+const ambientLight = new THREE.AmbientLight('#ffffff', 0.55)
 scene.add(ambientLight)
 
 // Directional light
-const directionalLight = new THREE.DirectionalLight('#ffffff', 0.5)
-directionalLight.position.set(2, 2, - 1)
+const directionalLight = new THREE.DirectionalLight('#ffffff', 0.6)
+directionalLight.position.set(0, 0, 0)
 scene.add(directionalLight)
+
+gui.add(directionalLight, 'intensity').min(0).max(1).step(0.001).name('light intensity')
+
+
+// Directional light helper
+const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1)
+directionalLightHelper.visible = false
+scene.add(directionalLightHelper)
+
+gui.add(directionalLightHelper, 'visible').name('directional light helper')
+
+// add directional light sphere
+const directionalLightSphere = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.05, 32, 32),
+    new THREE.MeshBasicMaterial({ color: '#ffffff' })
+)
+
+directionalLightSphere.position.copy(directionalLight.position)
+scene.add(directionalLightSphere)
+
+// add point light
+const pointLight = new THREE.PointLight('#ffffff', 0.7, 10, 2)
+pointLight.position.set(0, 0, 0)
+scene.add(pointLight)
+
+gui.add(pointLight, 'intensity').min(0).max(1).step(0.001).name('point light intensity')
+
+// add point light sphere
+const pointLightSphere = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.05, 32, 32),
+    new THREE.MeshBasicMaterial({ color: '#ffffff' })
+)
+
+pointLightSphere.position.copy(pointLight.position)
+scene.add(pointLightSphere)
+
 
 /**
  * Sizes
@@ -112,8 +150,10 @@ window.addEventListener('resize', () =>
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(40, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(10, 10, -15)
+const camera = new THREE.PerspectiveCamera(30, sizes.width / sizes.height, 0.1, 100)
+camera.position.set(-2, -10, -10)
+camera.lookAt(0, 0, 0)
+// camera.rotation.y = Math.PI * 0.5
 scene.add(camera)
 
 // Controls
@@ -138,7 +178,7 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 // Background 
-debugObject.backgroundColor = "#dfe8ec"
+debugObject.backgroundColor = "1a181b"
 renderer.setClearColor(debugObject.backgroundColor)
 gui
     .addColor(debugObject, 'backgroundColor')
@@ -160,7 +200,24 @@ const tick = () =>
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
 
-    // directionalLight.position.z = Math.cos(elapsedTime)
+    directionalLight.position.z = Math.cos(elapsedTime) * 2
+    directionalLight.position.x = Math.sin(elapsedTime) * 5
+    directionalLight.position.y = Math.sin(elapsedTime)
+
+    //change color of light
+    directionalLight.color.setHSL(Math.sin(elapsedTime * 0.5), 1, 0.5)
+    directionalLightHelper.update()
+
+    //directional light sphere
+    directionalLightSphere.position.copy(directionalLight.position)
+    //change directional light sphere color
+    directionalLightSphere.material.color.setHSL(Math.sin(elapsedTime * 0.5), 1, 0.5)
+
+    //change point light
+    pointLight.position.x = Math.sin(elapsedTime * 0.5) * 5
+    pointLight.position.y = Math.cos(elapsedTime * 0.5) * 3
+    pointLightSphere.position.copy(pointLight.position)
+
 
     // Update controls
     controls.update()
@@ -170,6 +227,8 @@ const tick = () =>
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
+
+    
 }
 
 tick()

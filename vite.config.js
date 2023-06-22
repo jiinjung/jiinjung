@@ -31,5 +31,6 @@ export default {
               zjiderveldPlot: '/playground/apps/zjiderveldPlot.html',
             }
         }
-    }
+    },
+    assetsInclude: '**/*.glb'
 }

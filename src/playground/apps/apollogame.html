@@ -62,10 +62,10 @@ canvas {
 <canvas id="canvas"></canvas>
 <img id="module" src="../static/images/apollolandingmodule_.svg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width:100px;  " />
 
-<audio id="background-music" src="../static/sounds/background-music.mp3"></audio>
-<audio id="hit-sound" src="../static/sounds/hit-sound.wav"></audio>
-<audio id="score-sound" src="../static/sounds/score-sound.wav"></audio>
-<audio id="finish-sound" src="../static/sounds/finish-sound.wav"></audio>
+<audio id="background-music"></audio>
+<audio id="hit-sound"></audio>
+<audio id="score-sound"></audio>
+<audio id="finish-sound"></audio>
 
 <div id="victory-screen">
   <h1>Congratulations!</h1>
@@ -85,6 +85,13 @@ canvas {
 import astronautpath from "../static/images/astronaut.svg"
 import rockpath from "../static/images/rock.svg"
 import rabbitpath from "../static/images/rabbit.svg"
+
+// import sounds
+import backgroundMusicPath from "../static/sounds/background-music.mp3"
+import hitSoundPath from "../static/sounds/hit-sound.wav"
+import scoreSoundPath from "../static/sounds/score-sound.wav"
+import finishSoundPath from "../static/sounds/finish-sound.wav"
+
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -106,6 +113,18 @@ muteButton.addEventListener("click", function() {
   muteButton.textContent = isMuted ? "Unmute sound" : "Mute sound";
 });
 
+// get the sound and add the link path
+const backgroundMusic = document.getElementById("background-music");
+backgroundMusic.src = backgroundMusicPath;
+
+const hitSound = document.getElementById("hit-sound");
+hitSound.src = hitSoundPath;
+
+const scoreSound = document.getElementById("score-sound");
+scoreSound.src = scoreSoundPath;
+
+const finishSound = document.getElementById("finish-sound");
+finishSound.src = finishSoundPath;
 
 
 // Load astronaut image

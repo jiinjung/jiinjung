@@ -249,6 +249,10 @@ import * as dat from 'lil-gui'
 import * as numeric from 'numeric'; // somehow not working in vite but in webgl, so I use ml-matrix instead for eigenvalue calculation
 import { Matrix, EigenvalueDecomposition } from 'ml-matrix';
 
+import calculationSoundPath from "../static/sounds/calculate.wav"
+import selectionSoundPath from "../static/sounds/select.wav"
+import unSelectionSoundPath from "../static/sounds/unselect.wav"
+
 
 const ref = 50
 const scale = 1e7
@@ -513,18 +517,18 @@ const menubar2 = document.getElementById('menubar2')
 /**
  * Sounds
  */
-const calculationSound = new Audio('../static/sounds/calculate.wav')
+const calculationSound = new Audio(calculationSoundPath)
 const playCalculationSound = () => { 
     calculationSound.currentTime = 0
     calculationSound.play()
 }
 
-const selectionSound = new Audio('../static/sounds/select.wav')
+const selectionSound = new Audio(selectionSoundPath)
 const playSelectionSound = () => { 
     selectionSound.currentTime = 0
     selectionSound.play()}
 
-const unSelectionSound = new Audio('../static/sounds/unselect.wav')
+const unSelectionSound = new Audio(unSelectionSoundPath)
 const playUnSelectionSound = () => { 
     unSelectionSound.currentTime = 0
     unSelectionSound.play()}
