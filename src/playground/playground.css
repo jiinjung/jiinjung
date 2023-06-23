@@ -7,30 +7,29 @@
 
 .menubar{
     position: fixed;
-    top: 5px;
-    right: 5px;
-    width: 50px;
-    height: 50px;
-    z-index: 99;
+    /* bottom:0px; */
+    /* right: 5px; */
+    width: 100vw;
+    /* height: 100px; */
+    z-index: 9999;
     background-color: rgb(197, 223, 223);
-    border-radius: 50%;
+    /* border-radius: 5px; */
     overflow: hidden;
     align-items: center;
-    border : 1px solid rgb(169, 169, 169);
-    opacity: 0.9;
+    /* border : 1px solid rgb(169, 169, 169); */
+    opacity: 1;
 }
 
 .menubar_text{
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: left;
     text-align: center;
     transition: 0.5s;
-    padding: 10px;
+    padding: 5px;
     font-size: 20px;
-    color: rgb(52, 53, 58);
+    color: rgb(0, 0, 0)
 }
-
 
 .sidenav {
     display: flex;
@@ -115,20 +114,25 @@
 }
 
 
-@media screen and (max-width:420px) {
+@media screen and (max-width:500px) {
+    
+    .thumbnail_div{
+        min-width: 310px;
+    }
 
     .sidenav {
-        width: 90vw;
-        min-width: 90vw;
+        margin-top:40px;
+        width: 310px;
         height:100vh;
         position: fixed;
         z-index: 1;
         background-color: #efefef;
         overflow:scroll;
-        opacity: 0.9;
+        opacity: 1;
     }
 
     .appContainer {
+        margin-top:40px;
         margin-left: 0vw;
         position: fixed;
         height:100vh;

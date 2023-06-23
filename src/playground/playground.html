@@ -11,7 +11,7 @@
 </head>
 <body>
     <div id="menubar" class="menubar" onclick="hideSideNav()">
-        <h1 class ="menubar_text"> ◀️  </h1>
+        <h1 class ="menubar_text"> ◀️ </h1>
     </div>
 
     <div class="sidenav">
@@ -23,7 +23,7 @@
         </div>
         </div>    
 
-        <div class="thumbnail_div" onclick="changeContent_src('apps/zjiderveldPlot.html')" >
+        <div class="thumbnail_div" onclick="changeContent_html('apps/zjiderveldPlot.html')" >
         <img src="thumbnail/zjiderveld.jpg" class="thumbnail_img">
         <div class ="thumbnail_text">
             <h1> #zjiderveldplot #vectorenddiagram #paleomagnetism </h1>
@@ -164,7 +164,7 @@
     //menubar only appear when the screen is small
 
     const menubar = document.getElementById("menubar");
-    if (window.innerWidth > 400){
+    if (window.innerWidth > 500){
         // show menubar
         menubar.style.display = "none";
     } else {
