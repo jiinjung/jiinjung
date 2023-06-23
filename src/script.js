@@ -187,8 +187,7 @@ gltfLoader.load(
         gltf.scene.traverse((child) => {
             
             if (child.isMesh) {
-            
-                console.log(child)
+        
                 child.material.color = new THREE.Color(0xffc0cb)
 
                 // make a standard material
