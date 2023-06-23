@@ -12,6 +12,7 @@
     "vite": "^4.0.4"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.0.1",
     "eigen": "^0.2.1",
     "gsap": "^3.11.4",
     "handtrackjs": "^0.1.5",

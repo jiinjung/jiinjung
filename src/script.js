@@ -5,6 +5,8 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import enfj from '../static/images/enfj_white.png'
 import Typed from 'typed.js'
 import { string } from 'mathjs'
+import { inject } from '@vercel/analytics';
+inject();
 
 
 /** 
