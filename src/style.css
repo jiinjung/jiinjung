@@ -1117,7 +1117,6 @@ section:nth-child(odd)
         transform: scale(1.00);
     }
 
-
     .research_img{
         width: 300px;
         height: 200px;
@@ -1128,11 +1127,9 @@ section:nth-child(odd)
         height: 200px;
     }
 
-
-
 }
 
-@media screen and (max-width:420px) {
+@media screen and (max-width:500px) {
     .header{ 
         min-width: none;
         margin: 0%; 
