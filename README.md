@@ -1,4 +1,8 @@
-### Hi there 👋
+
+[![Anurag's GitHub stats-Dark](https://github-readme-stats.vercel.app/api?username=jiinjung&rank_icon=github&show_icons=true&include_all_commits=true&hide_title=true&hide_border=true&theme=dark#gh-dark-mode-only)](https://github.com/anuraghazra/github-readme-stats#gh-dark-mode-only)
+[![Anurag's GitHub stats-Light](https://github-readme-stats.vercel.app/api?username=jiinjung&rank_icon=github&show_icons=true&include_all_commits=true&hide_title=true&hide_border=true&theme=default#gh-light-mode-only)](https://github.com/anuraghazra/github-readme-stats#gh-light-mode-only)
+[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=jiinjung&langs_count=3&hide_title=true&hide_border=true&theme=default#gh-light-mode-only)](https://github.com/anuraghazra/github-readme-stats#gh-light-mode-only)
+[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=jiinjung&langs_count=3&hide_title=true&hide_border=true&theme=dark#gh-dark-mode-only)](https://github.com/anuraghazra/github-readme-stats#gh-dark-mode-only)
 
 <!--
 **jiinjung/jiinjung** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
