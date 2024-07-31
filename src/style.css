@@ -136,8 +136,10 @@ html
 
 
 .prof_img{
-    width: 250px;
-    border-radius: 20px;
+    /* cut them square */
+    border-radius: 50%;
+    width: 300px;
+    border-radius: 50%;
     opacity: 0.91;
     z-index: 1;
 }

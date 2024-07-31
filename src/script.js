@@ -4,10 +4,15 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import enfj from '../static/images/enfj_white.png'
 import Typed from 'typed.js'
-import { string } from 'mathjs'
+import { cos, string } from 'mathjs'
 import { inject } from '@vercel/analytics';
 inject();
 
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-WNXN37MNTZ');
 
 /** 
  * loading page 
